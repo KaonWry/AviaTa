@@ -12,7 +12,7 @@ app.use(express.json());
 app.get('/api/greeting', (req, res) => {
   // You can also use template literals here for uniformity:
   console.log(`Received request for /api/greeting`);
-  res.json({ message: 'Mekas Ganteng' });
+  res.json({ message: 'Mekas Ganteng Banget sumpah asli' });
 });
 
 // Start the server
