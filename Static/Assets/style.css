@@ -1,0 +1,723 @@
+
+:root {
+  --bg-main: #FBFBFB;
+  --primary-light: #8FABD4;
+  --primary: #4A70A9;
+  --text-main: #000000;
+  --border-soft: #E0E0E0;
+  --grey-soft: #F2F2F2;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  border: none;
+  cursor: pointer;
+}
+
+/* LAYOUT UMUM */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+main {
+  flex: 1;
+  padding-bottom: 40px;
+}
+
+/* NAVBAR */
+
+.site-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 24px;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lang-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background-color: #ffffff;
+  font-size: 13px;
+}
+
+.flag-dot {
+  width: 14px;
+  height: 10px;
+  background: linear-gradient(180deg, #FF0000 0 50%, #FFFFFF 50% 100%);
+  border-radius: 2px;
+}
+
+.btn {
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  border: 1px solid transparent;
+  background-color: transparent;
+}
+
+.btn-outline {
+  border-color: var(--primary);
+  color: var(--primary);
+  background-color: #ffffff;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/* USER MENU (navbar kanan saat login) */
+
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background-color: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.user-name {
+  font-size: 14px;
+}
+
+.user-menu-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background-color: #ffffff;
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 160px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+  padding: 6px 0;
+  display: none;
+  z-index: 30;
+}
+
+.user-dropdown a {
+  display: block;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.user-dropdown a:hover {
+  background-color: var(--grey-soft);
+}
+
+.user-menu.is-open .user-dropdown {
+  display: block;
+}
+
+/* HERO HOME */
+
+.hero {
+  margin-top: 24px;
+  background-color: #E6E9F0;
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.hero-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.hero-text {
+  flex: 1 1 260px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333333;
+}
+
+.hero-heading {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.hero-sub {
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+/* KARTU FORM PENCARIAN */
+
+.search-card {
+  flex: 1 1 320px;
+  background-color: var(--primary-light);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 12px;
+}
+
+.field input,
+.field select {
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.search-footer {
+  margin-top: 6px;
+}
+
+.search-footer .btn-primary {
+  width: 100%;
+  border-radius: 999px;
+}
+
+/* SECTION TUJUAN & COUNTRY */
+
+.section {
+  margin-top: 32px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  font-size: 12px;
+  background-color: #ffffff;
+}
+
+.chip.is-active {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* CARD DESTINASI */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+}
+
+.card-destination {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--border-soft);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-thumb {
+  height: 90px;
+  border-radius: 12px;
+  border: 2px dashed #b0b0b0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #7a7a7a;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.card-desc {
+  font-size: 12px;
+  color: #666666;
+}
+
+/* FOOTER */
+
+.site-footer {
+  background-color: #E0E0E0;
+  padding: 22px 0 16px;
+  margin-top: 16px;
+}
+
+.footer-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  font-size: 12px;
+}
+
+.footer-col h4 {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.footer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-list li + li {
+  margin-top: 4px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.footer-social-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.footer-bottom {
+  max-width: 1180px;
+  margin: 8px auto 0;
+  padding: 0 24px;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* SEARCH PAGE */
+
+.page-search main {
+  padding-top: 24px;
+}
+
+.layout-search {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 24px;
+}
+
+.filter-panel {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+  font-size: 13px;
+}
+
+.filter-group + .filter-group {
+  margin-top: 16px;
+}
+
+.filter-group-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.filter-option input {
+  accent-color: var(--primary);
+}
+
+.pills-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.pill {
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  font-size: 12px;
+}
+
+.pill.is-active {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.price-range {
+  width: 100%;
+}
+
+/* inline search bar di halaman search */
+.search-inline {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-inline input {
+  flex: 1 1 auto;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  padding: 6px 12px;
+  font-size: 13px;
+  background-color: #ffffff;
+}
+
+.search-results-header {
+  background-color: #ffffff;
+  border-radius: 16px 16px 0 0;
+  border: 1px solid var(--border-soft);
+  border-bottom: none;
+  padding: 12px 16px;
+  font-size: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.search-results-body {
+  border-radius: 0 0 16px 16px;
+  border: 1px solid var(--border-soft);
+  background-color: #ffffff;
+}
+
+.tag-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-bar .pill {
+  background-color: #f5f5f5;
+}
+
+.result-card {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-airline {
+  font-weight: 600;
+}
+
+.result-meta {
+  color: #555555;
+  font-size: 12px;
+}
+
+.result-price {
+  text-align: right;
+}
+
+.result-price-main {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.result-price-sub {
+  font-size: 11px;
+  color: #666666;
+}
+
+/* TICKET LIST PAGE */
+
+.ticket-wrapper {
+  margin-top: 24px;
+  background-color: #E6E9F0;
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.ticket-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.ticket-card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+  margin-bottom: 22px;
+}
+
+.ticket-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.ticket-table-wrapper {
+  overflow-x: auto;
+}
+
+.ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ticket-table th,
+.ticket-table td {
+  border: 1px solid var(--border-soft);
+  padding: 6px 8px;
+}
+
+.ticket-table thead th {
+  background-color: var(--primary);
+  color: #ffffff;
+  text-align: left;
+}
+
+/* TRACKING PAGE */
+
+.tracking-wrapper {
+  margin-top: 24px;
+  background-color: #E6E9F0;
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.tracking-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.tracking-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.tracking-search input {
+  flex: 1 1 200px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  padding: 7px 12px;
+  font-size: 14px;
+}
+
+.tracking-card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+}
+
+.tracking-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.tracking-status {
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+.status-label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.status-steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.progress-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background-color: #d3d7de;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 60%;
+  background-color: var(--primary);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .hero-inner {
+    flex-direction: column;
+  }
+
+  .layout-search {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filter-panel {
+    order: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    align-items: center;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+}

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>AviaTa – Hasil Pencarian Penerbangan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="Assets/style.css">
+</head>
+<body class="page page-search">
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="brand-logo"></div>
+        <div class="brand-name">AviaTa</div>
+      </div>
+      <div class="nav-right">
+        <button class="lang-select">
+          <span class="flag-dot"></span>
+          <span>ID/EN</span>
+        </button>
+        <div class="user-menu">
+          <button type="button" class="user-menu-toggle" data-user-menu-toggle>
+            <div class="user-avatar">U</div>
+            <span class="user-name">Username</span>
+            <span>▾</span>
+          </button>
+          <div class="user-dropdown">
+            <a href="tickets.html">E-Ticket Saya</a>
+            <a href="tracking.html">Tracking Penerbangan</a>
+            <a href="index-user.html">Profil</a>
+            <a href="index-guest.html">Logout</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="layout-search">
+      <!-- FILTER -->
+      <aside class="filter-panel">
+        <div class="filter-group">
+          <div class="filter-group-title">Maskapai</div>
+          <label class="filter-option">
+            <input type="checkbox" name="airline" value="Airline A" checked> <span>Airline A</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="airline" value="Airline B"> <span>Airline B</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="airline" value="Airline C"> <span>Airline C</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="airline" value="Airline D"> <span>Airline D</span>
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">Kelas</div>
+          <label class="filter-option">
+            <input type="checkbox" name="class" value="Ekonomi" checked> <span>Ekonomi</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="class" value="Bisnis"> <span>Bisnis</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="class" value="First Class"> <span>First Class</span>
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">Waktu Berangkat</div>
+          <div class="pills-group" data-pills-group data-depart-group>
+            <button type="button" class="pill is-active" data-time-range="all">Semua</button>
+            <button type="button" class="pill" data-time-range="dawn">00:00–06:00</button>
+            <button type="button" class="pill" data-time-range="morning">Pagi</button>
+            <button type="button" class="pill" data-time-range="afternoon">Siang</button>
+            <button type="button" class="pill" data-time-range="evening">Sore–Malam</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">Waktu Tiba</div>
+          <div class="pills-group" data-pills-group data-arrive-group>
+            <button type="button" class="pill is-active" data-time-range="all">Semua</button>
+            <button type="button" class="pill" data-time-range="morning">Pagi</button>
+            <button type="button" class="pill" data-time-range="afternoon">Siang</button>
+            <button type="button" class="pill" data-time-range="night">Malam</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title">Harga</div>
+          <input type="range" class="price-range" id="price-range" min="300000" max="5000000" value="5000000" step="50000">
+          <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:4px;">
+            <span>Rp 300rb</span>
+            <span id="price-range-label">Rp 5jt+</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- HASIL -->
+      <section>
+        <!-- search bar kecil di bagian atas hasil -->
+        <div class="search-inline">
+          <input type="text" id="search-keyword" placeholder="Cari maskapai atau kota (mis: Airline A, Jakarta)">
+          <button type="button" class="btn btn-outline btn-sm" id="search-clear">Reset</button>
+        </div>
+
+        <div class="search-results-header">
+          <div>Pilih penerbangan keberangkatan</div>
+          <div class="tag-bar" data-sort-group>
+            <button type="button" class="pill is-active" data-sort="cheapest">Termurah</button>
+            <button type="button" class="pill" data-sort="fastest">Tercepat</button>
+            <button type="button" class="pill" data-sort="earliest">Paling awal</button>
+            <button type="button" class="pill" data-sort="latest">Paling malam</button>
+          </div>
+        </div>
+
+        <div class="search-results-body" id="results-list">
+          <!-- hasil penerbangan akan di-render via JS -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>AviaTa</h4>
+        <ul class="footer-list">
+          <li><a href="#">Help Centre</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Partnership</a></li>
+          <li><a href="#">Advertising</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Tentang AviaTa</h4>
+        <ul class="footer-list">
+          <li><a href="#">Tentang kami</a></li>
+          <li><a href="#">Kebijakan privasi</a></li>
+          <li><a href="#">Syarat & ketentuan</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Kontak kami</h4>
+        <div class="footer-social">
+          <span class="footer-social-icon">IG</span>
+          <span class="footer-social-icon">FB</span>
+          <span class="footer-social-icon">X</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 AviaTa. All rights reserved.</div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

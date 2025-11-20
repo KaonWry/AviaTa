@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>AviaTa – Pesan Tiket Pesawat Online</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="Assets/style.css">
+</head>
+<body class="page">
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="brand-logo"></div>
+        <div class="brand-name">AviaTa</div>
+      </div>
+      <div class="nav-right">
+        <button class="lang-select">
+          <span class="flag-dot"></span>
+          <span>ID/EN</span>
+        </button>
+        <a href="#" class="btn btn-outline">Login</a>
+        <a href="#" class="btn btn-primary">Sign Up</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <div class="hero-heading">Cari & pesan tiket pesawat dengan mudah.</div>
+          <div class="hero-sub">
+            Temukan penerbangan terbaik untuk perjalananmu, bandingkan harga,
+            durasi, dan fasilitas maskapai dalam satu halaman.
+          </div>
+          <p>
+            AviaTa membantu kamu mendapatkan tiket dengan harga transparan tanpa
+            biaya tersembunyi. Dukungan berbagai metode pembayaran dan e-ticket
+            instan yang langsung terkirim ke email setelah pembayaran berhasil.
+          </p>
+        </div>
+
+        <form class="search-card" action="search.html" method="get">
+          <div class="search-grid">
+            <div class="field">
+              <label for="from-guest">Dari</label>
+              <input id="from-guest" type="text" placeholder="Jakarta (CGK)">
+            </div>
+            <div class="field">
+              <label for="to-guest">Ke</label>
+              <input id="to-guest" type="text" placeholder="Singapore (SIN)">
+            </div>
+            <div class="field">
+              <label for="depart-guest">Tanggal berangkat</label>
+              <input id="depart-guest" type="date">
+            </div>
+            <div class="field">
+              <label for="return-guest">Tanggal pulang</label>
+              <input id="return-guest" type="date">
+            </div>
+            <div class="field">
+              <label for="passenger-guest">Penumpang</label>
+              <select id="passenger-guest">
+                <option>1 Penumpang</option>
+                <option>2 Penumpang</option>
+                <option>3 Penumpang</option>
+                <option>4+ Penumpang</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="class-guest">Kelas</label>
+              <select id="class-guest">
+                <option>Ekonomi</option>
+                <option>Bisnis</option>
+                <option>First Class</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="search-footer">
+            <button class="btn btn-primary" type="submit">Cari Penerbangan</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- TUJUAN TERPOPULER -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Tujuan Terpopuler</h2>
+      </div>
+      <div class="card-grid">
+        <article class="card-destination">
+          <div class="card-thumb">Gambar destinasi</div>
+          <div class="card-title">Jakarta → Bali</div>
+          <div class="card-desc">Mulai dari Rp800.000 / orang</div>
+        </article>
+        <article class="card-destination">
+          <div class="card-thumb">Gambar destinasi</div>
+          <div class="card-title">Jakarta → Singapore</div>
+          <div class="card-desc">Penerbangan langsung tiap hari</div>
+        </article>
+        <article class="card-destination">
+          <div class="card-thumb">Gambar destinasi</div>
+          <div class="card-title">Surabaya → Jakarta</div>
+          <div class="card-desc">Pilihan maskapai lengkap</div>
+        </article>
+        <article class="card-destination">
+          <div class="card-thumb">Gambar destinasi</div>
+          <div class="card-title">Jakarta → Kuala Lumpur</div>
+          <div class="card-desc">Promo akhir pekan</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- COUNTRY SECTION -->
+    <section class="section" data-country-section>
+      <div class="section-header">
+        <h2 class="section-title">(Country)</h2>
+        <div class="chip-group" data-chip-group>
+          <button type="button" class="chip is-active" data-country="Singapore">Singapore</button>
+          <button type="button" class="chip" data-country="Malaysia">Malaysia</button>
+          <button type="button" class="chip" data-country="Japan">Japan</button>
+          <button type="button" class="chip" data-country="Korea Utara">Korea Utara</button>
+        </div>
+      </div>
+      <div class="card-grid" data-country-list>
+        <!-- Diisi lewat JS sesuai negara -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>AviaTa</h4>
+        <ul class="footer-list">
+          <li><a href="#">Help Centre</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Partnership</a></li>
+          <li><a href="#">Advertising</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Tentang AviaTa</h4>
+        <ul class="footer-list">
+          <li><a href="#">Tentang kami</a></li>
+          <li><a href="#">Kebijakan privasi</a></li>
+          <li><a href="#">Syarat & ketentuan</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Kontak kami</h4>
+        <div class="footer-social">
+          <span class="footer-social-icon">IG</span>
+          <span class="footer-social-icon">FB</span>
+          <span class="footer-social-icon">X</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 AviaTa. All rights reserved.</div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
