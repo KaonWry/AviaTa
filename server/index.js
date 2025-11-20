@@ -9,10 +9,14 @@ app.use(cors());
 app.use(express.json());
 
 // Define a simple API route
+app.get('/api/username', (req, res) => {
+  console.log(`Received request for /api/username`);
+  res.json({ message: 'Mekas' });
+});
+
 app.get('/api/greeting', (req, res) => {
-  // You can also use template literals here for uniformity:
   console.log(`Received request for /api/greeting`);
-  res.json({ message: 'Mekas Ganteng Banget sumpah asli' });
+  res.json({ message: 'Mekas ganteng banget' });
 });
 
 // Start the server
