@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import db from './config/db.js';
 
 const app = express();
 const port = 3001;
@@ -8,12 +9,23 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
+// Test DB Connection
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT 1 + 1 AS result');
+    res.json({ message: 'Database connected successfully!', result: rows[0].result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database connection failed', details: error.message });
+  }
+});
+
 // Dummy API endpoint for username
 app.get('/api/username', (req, res) => {
   res.json({ username: 'Mekas' });
 });
 
-
+// Dummy API endpoint for greeting
 app.get('/api/greeting', (req, res) => {
   console.log(`Received request for /api/greeting`);
   res.json({ message: 'Mekas ganteng banget' });
