@@ -36,7 +36,7 @@ const setupDatabase = async () => {
     connection = await mysql.createConnection({
       host: process.env.DB_HOST || '127.0.0.1',
       user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
+      password: process.env.DB_PASSWORD || 'rootpassword',
     });
 
     console.log('Connected to MySQL server.');

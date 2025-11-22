@@ -22,7 +22,7 @@ app.get('/api/test-db', async (req, res) => {
 
 // Dummy API endpoint for username
 app.get('/api/username', (req, res) => {
-  res.json({ username: 'Mekas' });
+  res.json({ username: 'Username' });
 });
 
 // Dummy API endpoint for greeting
