@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>AviaTa – Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="Assets/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="login-page">
+    <div class="login-wrapper">
+        <div class="login-title">Masuk ke AviaTa</div>
+        <button class="login-btn login-google"><i class="fa-brands fa-google"></i>
+            <span>Lanjutkan dengan Google</span>
+        </button>
+
+        <input
+            type="text"
+            id="login-id"
+            class="login-input"
+            placeholder="Email atau Nomor Telepon">
+
+        <div class="password-container">
+            <input
+                type="password"
+                id="login-pass"
+                class="login-input"
+                placeholder="Password">
+            <img
+                id="toggle-pass"
+                class="toggle-pass"
+                src="Assets/closed-eyes.png" alt="Tampilkan password">
+        </div>
+        <button class="login-btn" id="btn-login">Masuk</button>
+
+        <div class="login-divider">atau lanjut dengan</div>
+        <div class="social-row">
+            <button class="soc-btn"><i class="fa-brands fa-x-twitter"></i></button>
+            <button class="soc-btn"><i class="fa-brands fa-facebook"></i></button>
+            <button class="soc-btn"><i class="bi bi-apple"></i></button>
+        </div>
+
+        <div class="login-footer">
+                <p>
+                    Belum punya akun?
+                    <a href="register.html">Daftar sekarang</a>
+                </p>
+
+                <p>
+                    Dengan login, Anda menyetujui 
+                    <a href="#">Syarat & Ketentuan</a> dan 
+                    <a href="#">Kebijakan Privasi</a>.
+                </p>
+        </div>
+    </div>
+
+    <script>
+        const loginBtn = document.querySelector("#btn-login");
+        const loginId = document.querySelector("#login-id");
+        const loginPass = document.querySelector("#login-pass");
+        const togglePass = document.querySelector("#toggle-pass");
+        const openEyeIcon = "Assets/open-eye.png";
+        const closedEyeIcon = "Assets/closed-eyes.png";
+
+  // Show/Hide Password
+        togglePass.addEventListener("click", () => {
+            if (loginPass.type === "password") {
+                loginPass.type = "text";
+                togglePass.src = openEyeIcon;    
+            } else {
+                loginPass.type = "password";
+                togglePass.src = closedEyeIcon;  
+            }
+        });
+    // Login Validation
+        loginBtn.addEventListener("click", () => {
+            if (loginId.value.trim() === "" || loginPass.value.trim() === "") {
+                alert("Silakan isi email/nomor HP dan password.");
+                return;
+            }
+
+        // Simulasi login berhasil
+            window.location.href = "index-user.html";
+        });
+    </script>
+    
+</body>
+</html>

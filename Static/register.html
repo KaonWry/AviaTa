@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>AviaTa – Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="Assets/style.css">
+
+    <!-- ICON CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="login-page">
+
+    <div class="login-wrapper">
+        <div class="login-title">Daftar Akun AviaTa</div>
+
+        <!-- Google Sign Up -->
+        <button class="login-btn login-google">
+            <i class="fa-brands fa-google"></i>
+            <span>Daftar dengan Google</span>
+        </button>
+
+        <!-- INPUTS -->
+        <input 
+            type="text" 
+            id="reg-name" 
+            class="login-input" 
+            placeholder="Nama Lengkap">
+
+        <input 
+            type="text" 
+            id="reg-email" 
+            class="login-input" 
+            placeholder="Email atau Nomor Telepon">
+
+        <!-- PASSWORD -->
+        <div class="password-container">
+            <input 
+                type="password" 
+                id="reg-pass" 
+                class="login-input" 
+                placeholder="Password">
+            <img 
+                id="toggle-reg-pass" 
+                class="toggle-pass" 
+                src="Assets/closed-eyes.png" 
+                alt="Show">
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+        <div class="password-container">
+            <input 
+                type="password" 
+                id="reg-pass-confirm" 
+                class="login-input" 
+                placeholder="Konfirmasi Password">
+            <img 
+                id="toggle-reg-pass2" 
+                class="toggle-pass" 
+                src="Assets/closed-eyes.png" 
+                alt="Show">
+        </div>
+
+        <button class="login-btn" id="btn-register">Daftar</button>
+
+        <div class="login-footer">
+            Sudah punya akun? 
+            <a href="login.html">Masuk di sini</a>.
+        </div>
+    </div>
+
+<script>
+    const openEye = "Assets/open-eye.png";
+    const closedEye = "Assets/closed-eyes.png";
+
+    function toggle(inputId, imgId) {
+        const input = document.getElementById(inputId);
+        const img = document.getElementById(imgId);
+
+        img.addEventListener("click", () => {
+            if (input.type === "password") {
+                input.type = "text";
+                img.src = openEye;
+            } else {
+                input.type = "password";
+                img.src = closedEye;
+            }
+        });
+    }
+
+    toggle("reg-pass", "toggle-reg-pass");
+    toggle("reg-pass-confirm", "toggle-reg-pass2");
+
+    document.getElementById("btn-register").addEventListener("click", () => {
+        const name = document.getElementById("reg-name").value.trim();
+        const email = document.getElementById("reg-email").value.trim();
+        const pass = document.getElementById("reg-pass").value.trim();
+        const pass2 = document.getElementById("reg-pass-confirm").value.trim();
+
+        if (!name || !email || !pass || !pass2) {
+            alert("Mohon isi semua data.");
+            return;
+        }
+
+        if (pass !== pass2) {
+            alert("Password dan konfirmasi password tidak cocok.");
+            return;
+        }
+
+        alert("Registrasi berhasil! Silakan login.");
+        window.location.href = "login.html";
+    });
+</script>
+
+</body>
+</html>
