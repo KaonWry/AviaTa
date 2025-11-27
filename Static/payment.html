@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>AviaTa – Pembayaran</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="Assets/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="payment-page">
+
+  <!-- NAVBAR -->
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="brand-logo"></div>
+        <div class="brand-name">AviaTa</div>
+      </div>
+
+      <div class="nav-right">
+        <button class="lang-select">
+          <span class="flag-dot"></span>
+          <span>ID/EN</span>
+        </button>
+
+        <div class="user-menu">
+          <button type="button" class="user-menu-toggle" data-user-menu-toggle>
+            <div class="user-avatar">U</div>
+            <span class="user-name">Username</span>
+            <span>▾</span>
+          </button>
+
+          <div class="user-dropdown">
+            <a href="index-user.html">Beranda</a>
+            <a href="tickets.html">E-Ticket Saya</a>
+            <a href="tracking.html">Tracking Penerbangan</a>
+            <a href="profile.html">Profil</a>
+            <a href="index-guest.html">Logout</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!--  MAIN  -->
+  <div class="pay-container">
+
+    <div class="pay-left">
+      <!-- DETAIL PEMESAN -->
+      <div class="form-box">
+        <h2 class="section-title">Detail Pemesan</h2>
+
+        <div class="radio-row">
+          <label><input type="radio" name="title-order" checked> Tuan</label>
+          <label><input type="radio" name="title-order"> Nyonya</label>
+          <label><input type="radio" name="title-order"> Nona</label>
+        </div>
+
+        <div class="form-group">
+          <label>Nama Lengkap</label>
+          <input type="text" id="order-name" placeholder="Nama lengkap">
+        </div>
+
+        <div class="form-group">
+          <label>Nomor Telepon</label>
+          <input type="text" id="order-phone" placeholder="+62 ...">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="order-email" placeholder="email@domain.com">
+        </div>
+      </div>
+
+      <!-- DETAIL PENUMPANG -->
+      <div class="form-box">
+        <h2 class="section-title">Detail Penumpang</h2>
+
+        <div class="radio-row">
+          <label><input type="radio" name="title-pass" checked> Tuan</label>
+          <label><input type="radio" name="title-pass"> Nyonya</label>
+          <label><input type="radio" name="title-pass"> Nona</label>
+        </div>
+
+        <div class="form-group">
+          <label>Nama Depan</label>
+          <input type="text" placeholder="Nama depan" id="first-name">
+        </div>
+
+        <div class="form-group">
+          <label>Nama Belakang</label>
+          <input type="text" placeholder="Nama belakang" id="last-name">
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal Lahir</label>
+          <input type="date">
+        </div>
+
+        <h3 style="margin-top:20px;">Info Identitas</h3>
+
+        <div class="form-group">
+          <label>Kewarganegaraan</label>
+          <select>
+            <option>Indonesia</option>
+            <option>Malaysia</option>
+            <option>Singapore</option>
+            <option>Japan</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Nomor Paspor</label>
+          <input type="text" placeholder="A12345678">
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal Habis Berlaku Paspor</label>
+          <input type="date">
+        </div>
+      </div>
+
+      <!-- PROTEKSI -->
+      <div class="form-box">
+        <h2 class="section-title">Perlindungan Ekstra</h2>
+
+        <div class="protect-card">
+          <div class="protect-title">
+            <span>Bundle Perlindungan Penuh</span>
+            <button class="btn-add" data-protect="50000">+ Tambahkan</button>
+          </div>
+          <div>Asuransi penuh hingga 500 juta + reschedule maskapai.</div>
+          <div class="protect-price">IDR 50.000 / pax</div>
+        </div>
+
+        <div class="protect-card">
+          <div class="protect-title">
+            <span>Proteksi Keterlambatan</span>
+            <button class="btn-add" data-protect="14500">+ Tambahkan</button>
+          </div>
+          <div>Kompensasi keterlambatan hingga 600 ribu.</div>
+          <div class="protect-price">IDR 14.500 / pax</div>
+        </div>
+
+        <div class="protect-card">
+          <div class="protect-title">
+            <span>Asuransi Bagasi</span>
+            <button class="btn-add" data-protect="19900">+ Tambahkan</button>
+          </div>
+          <div>Perlindungan bagasi hingga 30 juta.</div>
+          <div class="protect-price">IDR 19.900 / pax</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SUMMARY -->
+    <div class="pay-right">
+
+      <div class="summary-title">Ringkasan Penerbangan</div>
+      <div id="summary-flight"></div>
+
+      <div class="summary-total">
+        Total: IDR <span id="total-price">0</span>
+      </div>
+
+      <button class="btn-pay" id="pay-now">Lanjut Bayar</button>
+
+    </div>
+
+  </div>
+
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>AviaTa</h4>
+        <ul class="footer-list">
+          <li><a href="#">Help Centre</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Partnership</a></li>
+          <li><a href="#">Advertising</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Tentang AviaTa</h4>
+        <ul class="footer-list">
+          <li><a href="#">Tentang kami</a></li>
+          <li><a href="#">Kebijakan privasi</a></li>
+          <li><a href="#">Syarat & ketentuan</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Kontak kami</h4>
+        <div class="footer-social">
+          <span class="footer-social-icon">IG</span>
+          <span class="footer-social-icon"><i class="fa-brands fa-facebook"></i></span>
+          <span class="footer-social-icon"><i class="fa-brands fa-x-twitter"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 AviaTa. All rights reserved.</div>
+  </footer>
+
+
+  <!-- USER DROPDOWN SCRIPT -->
+  <script>
+    const userMenuToggle = document.querySelector("[data-user-menu-toggle]");
+    const userMenu = document.querySelector(".user-menu");
+
+    if (userMenuToggle) {
+      userMenuToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        userMenu.classList.toggle("is-open");
+      });
+
+      document.addEventListener("click", () => {
+        userMenu.classList.remove("is-open");
+      });
+    }
+  </script>
+
+
+  <!-- PAYMENT SCRIPT -->
+  <script>
+    const flightBox = document.getElementById("summary-flight");
+    const totalEl = document.getElementById("total-price");
+
+    let selectedFlight = JSON.parse(localStorage.getItem("selectedFlight"));
+
+    if (!selectedFlight) {
+      flightBox.innerHTML = "<p>Tidak ada data penerbangan.</p>";
+    } else {
+      flightBox.innerHTML = `
+        <div class="summary-row"><b>${selectedFlight.route}</b></div>
+        <div class="summary-row">${selectedFlight.depart} → ${selectedFlight.arrive}</div>
+        <div class="summary-row">${selectedFlight.duration} • ${selectedFlight.stops}</div>
+        <div class="summary-row">Maskapai: ${selectedFlight.airline}</div>
+        <div class="summary-row">Kode: ${selectedFlight.code}</div>
+        <div class="summary-row">Harga Tiket: IDR ${selectedFlight.price.toLocaleString("id-ID")}</div>
+      `;
+    }
+
+    let basePrice = selectedFlight ? selectedFlight.price : 0;
+    let protectionAdd = 0;
+
+    function updateTotal() {
+      totalEl.textContent = (basePrice + protectionAdd).toLocaleString("id-ID");
+    }
+
+    updateTotal();
+
+    // Proteksi
+    document.querySelectorAll("[data-protect]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        let value = parseInt(btn.getAttribute("data-protect"));
+
+        if (btn.classList.contains("btn-add")) {
+          protectionAdd += value;
+          btn.classList.remove("btn-add");
+          btn.classList.add("btn-added");
+          btn.textContent = "✔ Ditambahkan";
+        } else {
+          protectionAdd -= value;
+          btn.classList.add("btn-add");
+          btn.classList.remove("btn-added");
+          btn.textContent = "+ Tambahkan";
+        }
+
+        updateTotal();
+      });
+    });
+
+    function generateTicketNumber() {
+      let y = new Date().getFullYear();
+      let r = Math.floor(1000 + Math.random() * 9000);
+      return `TKT-${y}-${r}`;
+    }
+
+    function generateTravelDate() {
+      let today = new Date();
+      today.setDate(today.getDate() + 2);
+      return today.toISOString();
+    }
+
+    document.getElementById("pay-now").addEventListener("click", () => {
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+
+      let newTicket = {
+        id: Date.now(),
+        ticketNumber: generateTicketNumber(),
+        name: document.getElementById("order-name").value || "Penumpang",
+        flightCode: selectedFlight.code,
+        airline: selectedFlight.airline,
+        route: selectedFlight.route,
+        depart: selectedFlight.depart,
+        arrive: selectedFlight.arrive,
+        facilities: selectedFlight.facilities,
+        date: new Date().toISOString(),
+        travelDate: generateTravelDate(),
+        price: basePrice + protectionAdd
+      };
+
+      tickets.push(newTicket);
+      localStorage.setItem("tickets", JSON.stringify(tickets));
+
+      alert("Pembayaran berhasil! Tiket masuk ke daftar E-Ticket.");
+      window.location.href = "tickets.html";
+    });
+  </script>
+
+</body>
+</html>

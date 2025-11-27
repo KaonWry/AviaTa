@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>AviaTa – Profil Saya</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="Assets/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body class="page">
+
+  <!-- NAVBAR -->
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="brand-logo"></div>
+        <div class="brand-name">AviaTa</div>
+      </div>
+
+      <div class="nav-right">
+        <button class="lang-select">
+          <span class="flag-dot"></span>
+          <span>ID/EN</span>
+        </button>
+
+        <div class="user-menu">
+          <button type="button" class="user-menu-toggle" data-user-menu-toggle>
+            <div class="user-avatar">U</div>
+            <span class="user-name" id="profile-username">User</span>
+            <span>▾</span>
+          </button>
+
+          <div class="user-dropdown">
+            <a href="index-user.html">Beranda</a>
+            <a href="tickets.html">E-Ticket Saya</a>
+            <a href="tracking.html">Tracking Penerbangan</a>
+            <a href="profile.html">Profil</a>
+            <a href="index-guest.html">Logout</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN PROFILE -->
+  <div class="profile-container">
+
+    <div class="profile-title">Pengaturan Profil</div>
+
+    <!-- PERSONAL DATA -->
+    <div class="section-title">Data Pribadi</div>
+
+    <div class="profile-row">
+      <div class="profile-field">
+        <label>Nama Lengkap</label>
+        <input id="fullName" type="text" placeholder="Nama sesuai identitas">
+      </div>
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-field">
+        <label>Gender</label>
+        <select id="gender">
+          <option value="Male">Laki-laki</option>
+          <option value="Female">Perempuan</option>
+          <option value="Other">Lainnya</option>
+        </select>
+      </div>
+
+      <div class="profile-field">
+        <label>Tanggal Lahir</label>
+        <input id="birthDate" type="date">
+      </div>
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-field">
+        <label>Kota Domisili</label>
+        <input id="city" type="text" placeholder="Contoh: Jakarta">
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="section-title">Kontak</div>
+
+    <div class="profile-row">
+      <div class="profile-field">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="Email aktif">
+      </div>
+      <div class="profile-field">
+        <label>Nomor HP</label>
+        <input id="phone" type="text" placeholder="08xxxxxxxxxx">
+      </div>
+    </div>
+
+    <button class="btn-save" id="saveProfile">Simpan Perubahan</button>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>AviaTa</h4>
+        <ul class="footer-list">
+          <li><a href="#">Help Centre</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Partnership</a></li>
+          <li><a href="#">Advertising</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Tentang AviaTa</h4>
+        <ul class="footer-list">
+          <li><a href="#">Tentang kami</a></li>
+          <li><a href="#">Kebijakan privasi</a></li>
+          <li><a href="#">Syarat & ketentuan</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Kontak kami</h4>
+        <div class="footer-social">
+          <span class="footer-social-icon">IG</span>
+          <span class="footer-social-icon"><i class="fa-brands fa-facebook"></i></span>
+          <span class="footer-social-icon"><i class="fa-brands fa-x-twitter"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 AviaTa. All rights reserved.</div>
+  </footer>
+
+  <!-- DROPDOWN SCRIPT -->
+  <script>
+    const userMenuToggle = document.querySelector("[data-user-menu-toggle]");
+    const userMenu = document.querySelector(".user-menu");
+
+    if (userMenuToggle) {
+      userMenuToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        userMenu.classList.toggle("is-open");
+      });
+
+      document.addEventListener("click", () => {
+        userMenu.classList.remove("is-open");
+      });
+    }
+  </script>
+
+  <!-- PROFILE STORAGE SCRIPT -->
+  <script>
+    const fields = {
+      name: document.getElementById("fullName"),
+      gender: document.getElementById("gender"),
+      birthDate: document.getElementById("birthDate"),
+      city: document.getElementById("city"),
+      email: document.getElementById("email"),
+      phone: document.getElementById("phone"),
+    };
+
+    function loadProfile() {
+      const data = JSON.parse(localStorage.getItem("profile")) || {};
+
+      fields.name.value = data.name || "";
+      fields.gender.value = data.gender || "Male";
+      fields.birthDate.value = data.birthDate || "";
+      fields.city.value = data.city || "";
+      fields.email.value = data.email || "";
+      fields.phone.value = data.phone || "";
+
+      document.getElementById("profile-username").textContent =
+        data.name || "User";
+    }
+
+    function saveProfile() {
+      const data = {
+        name: fields.name.value,
+        gender: fields.gender.value,
+        birthDate: fields.birthDate.value,
+        city: fields.city.value,
+        email: fields.email.value,
+        phone: fields.phone.value,
+      };
+
+      localStorage.setItem("profile", JSON.stringify(data));
+      alert("Profil berhasil diperbarui!");
+      loadProfile();
+    }
+
+    document.getElementById("saveProfile").addEventListener("click", saveProfile);
+    loadProfile();
+  </script>
+
+</body>
+</html>

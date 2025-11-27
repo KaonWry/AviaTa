@@ -1,36 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <title>AviaTa – E-Ticket Saya</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="stylesheet" href="Assets/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Library untuk PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </head>
-</head>
-<body class="page">
+
+<body class="tickets-page">
+
+  <!-- NAVBAR -->
   <header class="site-header">
     <nav class="navbar">
       <div class="nav-left">
         <div class="brand-logo"></div>
         <div class="brand-name">AviaTa</div>
       </div>
+
       <div class="nav-right">
         <button class="lang-select">
           <span class="flag-dot"></span>
           <span>ID/EN</span>
         </button>
+
         <div class="user-menu">
           <button type="button" class="user-menu-toggle" data-user-menu-toggle>
             <div class="user-avatar">U</div>
             <span class="user-name">Username</span>
             <span>▾</span>
           </button>
+
           <div class="user-dropdown">
+            <a href="index-user.html">Beranda</a>
             <a href="tickets.html">E-Ticket Saya</a>
             <a href="tracking.html">Tracking Penerbangan</a>
-            <a href="index-user.html">Profil</a>
+            <a href="profile.html">Profil</a>
             <a href="index-guest.html">Logout</a>
           </div>
         </div>
@@ -38,93 +48,44 @@
     </nav>
   </header>
 
-  <main class="container">
-    <section class="ticket-wrapper">
-      <h1 class="ticket-title">E-Ticket</h1>
+  <!-- CONTENT  -->
+  <h1>E-Ticket Saya</h1>
 
-      <div class="ticket-card">
-        <div class="ticket-subtitle">Aktif</div>
-        <div class="ticket-table-wrapper">
-          <table class="ticket-table">
-            <thead>
-              <tr>
-                <th style="width:40px;">No.</th>
-                <th>Penumpang</th>
-                <th>No. Penerbangan &amp; Tiket</th>
-                <th>Fasilitas</th>
-                <th>Masa Berlaku</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1.</td>
-                <td>Budi Santoso</td>
-                <td>AV1234 • 123-456-789</td>
-                <td>Bagasi 20kg, kursi reguler</td>
-                <td>Berangkat 12 Mei 2025</td>
-              </tr>
-              <tr>
-                <td>2.</td>
-                <td>Siti Aminah</td>
-                <td>AV5678 • 987-654-321</td>
-                <td>Bagasi 15kg, snack</td>
-                <td>Berangkat 20 Mei 2025</td>
-              </tr>
-              <tr>
-                <td>3.</td>
-                <td>Andi Saputra</td>
-                <td>AV9012 • 192-837-465</td>
-                <td>Bagasi kabin 7kg</td>
-                <td>Berangkat 01 Juni 2025</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <!--  TIKET AKTIF  -->
+  <h2>Tiket Aktif</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nama Penumpang</th>
+        <th>Nomor Tiket</th>
+        <th>Rute</th>
+        <th>Tanggal Penerbangan</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="active-tickets"></tbody>
+  </table>
 
-      <div class="ticket-card">
-        <div class="ticket-subtitle">Expired</div>
-        <div class="ticket-table-wrapper">
-          <table class="ticket-table">
-            <thead>
-              <tr>
-                <th style="width:40px;">No.</th>
-                <th>Penumpang</th>
-                <th>No. Penerbangan &amp; Tiket</th>
-                <th>Fasilitas</th>
-                <th>Masa Berlaku</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1.</td>
-                <td>Budi Santoso</td>
-                <td>AV0101 • 555-333-111</td>
-                <td>Bagasi 20kg, snack</td>
-                <td>Berangkat 01 Januari 2025</td>
-              </tr>
-              <tr>
-                <td>2.</td>
-                <td>Siti Aminah</td>
-                <td>AV0202 • 222-444-666</td>
-                <td>Bagasi kabin 7kg</td>
-                <td>Berangkat 15 Februari 2025</td>
-              </tr>
-              <tr>
-                <td>3.</td>
-                <td>Andi Saputra</td>
-                <td>AV0303 • 777-888-999</td>
-                <td>Bagasi 15kg</td>
-                <td>Berangkat 20 Maret 2025</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
+  <!-- TIKET EXPIRED -->
+  <h2 style="margin-top:60px;">Tiket Kadaluarsa</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nama Penumpang</th>
+        <th>Nomor Tiket</th>
+        <th>Rute</th>
+        <th>Tanggal Penerbangan</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="expired-tickets"></tbody>
+  </table>
 
-  <footer class="site-footer">
+
+  <!-- FOOTER -->
+  <footer class="site-footer" style="margin-top:80px;">
     <div class="footer-inner">
       <div class="footer-col">
         <h4>AviaTa</h4>
@@ -155,6 +116,109 @@
     <div class="footer-bottom">© 2025 AviaTa. All rights reserved.</div>
   </footer>
 
-  <script src="script.js"></script>
+
+  <!-- USER MENU DROPDOWN -->
+  <script>
+    const userMenuToggle = document.querySelector("[data-user-menu-toggle]");
+    const userMenu = document.querySelector(".user-menu");
+
+    if (userMenuToggle) {
+      userMenuToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        userMenu.classList.toggle("is-open");
+      });
+
+      document.addEventListener("click", () => {
+        userMenu.classList.remove("is-open");
+      });
+    }
+  </script>
+
+
+  <!-- ETICKET SCRIPT -->
+  <script>
+    const activeTable = document.getElementById("active-tickets");
+    const expiredTable = document.getElementById("expired-tickets");
+
+    let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+
+    function isExpired(date) {
+      return new Date(date) < new Date();
+    }
+
+    function formatDate(str) {
+      let d = new Date(str);
+      return d.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+    }
+
+    function renderTickets() {
+      activeTable.innerHTML = "";
+      expiredTable.innerHTML = "";
+
+      if (tickets.length === 0) {
+        activeTable.innerHTML = `<tr><td colspan="6" style="text-align:center;">Belum ada tiket.</td></tr>`;
+        expiredTable.innerHTML = `<tr><td colspan="6" style="text-align:center;">Tidak ada tiket kadaluarsa.</td></tr>`;
+        return;
+      }
+
+      tickets.forEach((t, index) => {
+        let row = `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${t.name}</td>
+            <td>${t.ticketNumber}</td>
+            <td>${t.route}</td>
+            <td>${formatDate(t.travelDate)}</td>
+            <td>
+              <button class="btn-download" onclick="downloadTicket(${t.id})">Download</button>
+              <button class="btn-delete" onclick="deleteTicket(${t.id})">Hapus</button>
+            </td>
+          </tr>
+        `;
+
+        if (isExpired(t.travelDate)) expiredTable.innerHTML += row;
+        else activeTable.innerHTML += row;
+      });
+    }
+
+    function deleteTicket(id) {
+      tickets = tickets.filter(t => t.id !== id);
+      localStorage.setItem("tickets", JSON.stringify(tickets));
+      renderTickets();
+    }
+
+    async function downloadTicket(id) {
+      const { jsPDF } = window.jspdf;
+
+      let t = tickets.find(t => t.id === id);
+      if (!t) return alert("Tiket tidak ditemukan");
+
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("E-TICKET | AviaTa", 20, 20);
+
+      doc.setFontSize(12);
+      doc.text(`Nomor Tiket: ${t.ticketNumber}`, 20, 40);
+      doc.text(`Nama Penumpang: ${t.name}`, 20, 50);
+      doc.text(`Maskapai: ${t.airline}`, 20, 60);
+      doc.text(`Kode Penerbangan: ${t.flightCode}`, 20, 70);
+
+      doc.text(`Rute: ${t.route}`, 20, 90);
+      doc.text(`Berangkat: ${t.depart}`, 20, 100);
+      doc.text(`Tiba: ${t.arrive}`, 20, 110);
+      doc.text(`Tanggal Penerbangan: ${formatDate(t.travelDate)}`, 20, 120);
+
+      doc.text(`Fasilitas: ${t.facilities}`, 20, 140);
+
+      doc.setFontSize(14);
+      doc.text(`Total Dibayar: IDR ${t.price.toLocaleString("id-ID")}`, 20, 160);
+
+      doc.save(`E-Ticket-${t.ticketNumber}.pdf`);
+    }
+
+    renderTickets();
+  </script>
+
 </body>
 </html>
