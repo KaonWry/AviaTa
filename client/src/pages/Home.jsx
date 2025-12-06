@@ -11,6 +11,12 @@ const Home = () => {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
+    // Check localStorage for username (dev session)
+    const stored = localStorage.getItem('username');
+    if (stored) {
+      setUsername(stored);
+      return;
+    }
     fetch("http://localhost:3001/api/username")
       .then((res) => res.json())
       .then((data) => {
@@ -98,19 +104,23 @@ const Home = () => {
                   >
                     Profil
                   </a>
-                  <a
-                    href="/logout"
-                    className="block px-4 py-2 text-sm hover:bg-[#F2F2F2]"
+                  <button
+                    type="button"
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-[#F2F2F2]"
+                    onClick={() => {
+                      localStorage.removeItem('username');
+                      window.location.reload();
+                    }}
                   >
                     Logout
-                  </a>
+                  </button>
                 </div>
               </div>
             )}
             {!username && (
               <>
                 <a
-                  href="#"
+                  href="/login"
                   className="btn btn-outline px-4 py-2 rounded-full text-[#4A70A9] border border-[#4A70A9] bg-white text-sm"
                 >
                   Login

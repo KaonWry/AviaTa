@@ -9,6 +9,33 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
+// Dummy user for login
+const DUMMY_USER = {
+  id: 1,
+  username: 'Username',
+  email: 'user@example.com',
+  phone: '08123456789',
+  password: 'password123' // In production, use hashed passwords!
+};
+
+// Auth login endpoint
+app.post('/api/login', (req, res) => {
+  const { id, password } = req.body;
+  if (!id || !password) {
+    return res.status(400).json({ error: 'ID and password are required.' });
+  }
+  // Accept login by email or phone
+  const isMatch =
+    (id === DUMMY_USER.email || id === DUMMY_USER.phone) &&
+    password === DUMMY_USER.password;
+  if (isMatch) {
+    // In production, set a session or JWT here
+    return res.json({ success: true, username: DUMMY_USER.username });
+  }
+  return res.status(401).json({ success: false, error: 'Email/phone or password salah.' });
+});
+
+
 // Test DB Connection
 app.get('/api/test-db', async (req, res) => {
   try {
@@ -20,9 +47,10 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// Dummy API endpoint for username
+// Dummy API endpoint for username (default guest session)
 app.get('/api/username', (req, res) => {
-  res.json({ username: 'Username' });
+  // For dev, always return guest (no username)
+  res.json({ username: null });
 });
 
 // Dummy API endpoint for greeting
