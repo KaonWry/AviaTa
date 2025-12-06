@@ -91,7 +91,7 @@ const Login = () => {
         <div className="login-footer text-xs text-center mt-2">
           <p>
             Belum punya akun?{' '}
-            <a href="#" className="text-[#4A70A9] hover:underline">Daftar sekarang</a>
+            <a href="/register" className="text-[#4A70A9] hover:underline">Daftar sekarang</a>
           </p>
           <p className="mt-1">
             Dengan login, Anda menyetujui{' '}

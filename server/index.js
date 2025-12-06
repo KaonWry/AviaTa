@@ -9,6 +9,31 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
+// Register endpoint: create user and log in
+app.post('/api/register', async (req, res) => {
+  const { name, email, password, passwordConfirm } = req.body;
+  if (!name || !email || !password || !passwordConfirm) {
+    return res.status(400).json({ error: 'Semua data harus diisi.' });
+  }
+  if (password !== passwordConfirm) {
+    return res.status(400).json({ error: 'Password dan konfirmasi tidak cocok.' });
+  }
+  try {
+    // Check if user already exists
+    const [existing] = await db.query('SELECT id FROM users WHERE email = ? LIMIT 1', [email]);
+    if (existing.length > 0) {
+      return res.status(409).json({ error: 'Email sudah terdaftar.' });
+    }
+    // Insert new user
+    await db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [name, email, password]);
+    // Get the new user
+    const [rows] = await db.query('SELECT username FROM users WHERE email = ? LIMIT 1', [email]);
+    return res.json({ success: true, username: rows[0].username });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error', details: error.message });
+  }
+});
 
 // Auth login endpoint (MySQL version, email only)
 app.post('/api/login', async (req, res) => {

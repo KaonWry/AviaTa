@@ -126,7 +126,7 @@ const Home = () => {
                   Login
                 </a>
                 <a
-                  href="#"
+                  href="/register"
                   className="btn btn-primary px-4 py-2 rounded-full bg-[#4A70A9] text-white text-sm"
                 >
                   Sign Up
