@@ -9,30 +9,32 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Dummy user for login
-const DUMMY_USER = {
-  id: 1,
-  username: 'Username',
-  email: 'user@example.com',
-  phone: '08123456789',
-  password: 'password123' // In production, use hashed passwords!
-};
 
-// Auth login endpoint
-app.post('/api/login', (req, res) => {
+// Auth login endpoint (MySQL version, email only)
+app.post('/api/login', async (req, res) => {
   const { id, password } = req.body;
   if (!id || !password) {
     return res.status(400).json({ error: 'ID and password are required.' });
   }
-  // Accept login by email or phone
-  const isMatch =
-    (id === DUMMY_USER.email || id === DUMMY_USER.phone) &&
-    password === DUMMY_USER.password;
-  if (isMatch) {
-    // In production, set a session or JWT here
-    return res.json({ success: true, username: DUMMY_USER.username });
+  try {
+    // Find user by email
+    const [rows] = await db.query(
+      'SELECT username, email, password FROM users WHERE email = ? LIMIT 1',
+      [id]
+    );
+    if (rows.length === 0) {
+      return res.status(401).json({ success: false, error: 'Email atau password salah.' });
+    }
+    const user = rows[0];
+    // In production, use bcrypt to compare hashed passwords!
+    if (user.password !== password) {
+      return res.status(401).json({ success: false, error: 'Email atau password salah.' });
+    }
+    return res.json({ success: true, username: user.username });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error', details: error.message });
   }
-  return res.status(401).json({ success: false, error: 'Email/phone or password salah.' });
 });
 
 
