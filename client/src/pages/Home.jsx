@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DestinationGrid } from "../components/ui/destination-card";
-import { JollyDatePicker } from "../components/ui/date-picker";
+import { FlightSearchCard } from "../components/ui/flight-search-card";
 import { AboutUsSection } from "../components/ui/testimonial-carousel";
 
 const COUNTRY_LIST = ["Singapore", "Malaysia", "Japan", "Korea Utara"];
@@ -35,113 +35,39 @@ const Home = () => {
   }, [country]);
 
   return (
-    <div className="page min-h-screen flex flex-col bg-background text-foreground pt-24 transition-colors duration-300">
+    <div className="page min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
+      {/* Hero Section with Background */}
+      <section className="relative min-h-[500px] md:min-h-[550px] overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80')"
+          }}
+        >
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-primary/40" />
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 container max-w-[1180px] mx-auto px-6 pt-32 pb-12">
+          {/* Hero Text */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 drop-shadow-lg">
+              PESAN PENERBANGAN TERBAIKMU DI AVIATA
+            </h1>
+            <p className="text-white/90 text-lg md:text-xl drop-shadow">
+              Cari & pesan tiket dari 200+ maskapai penerbangan di seluruh dunia
+            </p>
+          </div>
+
+          {/* Flight Search Card */}
+          <FlightSearchCard className="max-w-4xl mx-auto" />
+        </div>
+      </section>
+
       {/* Main Content */}
       <main className="container max-w-[1180px] mx-auto px-6 pb-10 flex-1">
-        {/* Hero Section */}
-        <section className="hero mt-6 bg-secondary dark:bg-muted rounded-2xl p-6 transition-colors duration-300">
-          <div className="hero-inner flex flex-wrap gap-6">
-            <div className="hero-text flex-1 min-w-[260px] text-sm leading-relaxed text-foreground">
-              <div className="hero-heading text-xl font-semibold mb-2">
-                Cari & pesan tiket pesawat dengan mudah.
-              </div>
-              <div className="hero-sub text-sm mb-3 text-muted-foreground">
-                Temukan penerbangan terbaik untuk perjalananmu, bandingkan
-                harga, durasi, dan fasilitas maskapai dalam satu halaman.
-              </div>
-              <p>
-                AviaTa membantu kamu mendapatkan tiket dengan harga transparan
-                tanpa biaya tersembunyi. Dukungan berbagai metode pembayaran dan
-                e-ticket instan yang langsung terkirim ke email setelah
-                pembayaran berhasil.
-              </p>
-            </div>
-            <form
-              className="search-card flex-1 min-w-[320px] bg-primary/80 dark:bg-primary/60 rounded-xl p-5 shadow-md flex flex-col gap-3"
-              action="/search"
-              method="get"
-            >
-              <div className="search-grid grid grid-cols-2 gap-x-4 gap-y-3">
-                {/* ...existing code... */}
-                <div className="field flex flex-col gap-1">
-                  <label htmlFor="from-guest" className="text-xs text-white">
-                    Dari
-                  </label>
-                  <input
-                    id="from-guest"
-                    name="from"
-                    type="text"
-                    placeholder="Jakarta (CGK)"
-                    className="rounded-full border bg-background text-foreground border-border px-2 py-1 text-sm"
-                  />
-                </div>
-                <div className="field flex flex-col gap-1">
-                  <label htmlFor="to-guest" className="text-xs text-white">
-                    Ke
-                  </label>
-                  <input
-                    id="to-guest"
-                    name="to"
-                    type="text"
-                    placeholder="Singapore (SIN)"
-                    className="rounded-full border bg-background text-foreground border-border px-2 py-1 text-sm"
-                  />
-                </div>
-                <div className="field flex flex-col gap-1">
-                  <JollyDatePicker 
-                    label={<span className="text-xs text-white">Tanggal berangkat</span>}
-                    className="[&_[data-slot=label]]:text-white"
-                    granularity="day"
-                  />
-                </div>
-                <div className="field flex flex-col gap-1">
-                  <JollyDatePicker 
-                    label={<span className="text-xs text-white">Tanggal pulang</span>}
-                    className="[&_[data-slot=label]]:text-white"
-                    granularity="day"
-                  />
-                </div>
-                <div className="field flex flex-col gap-1">
-                  <label htmlFor="passenger-guest" className="text-xs text-white">
-                    Penumpang
-                  </label>
-                  <select
-                    id="passenger-guest"
-                    name="passenger"
-                    className="rounded-full border bg-background text-foreground border-border px-2 py-1 text-sm"
-                  >
-                    <option>1 Penumpang</option>
-                    <option>2 Penumpang</option>
-                    <option>3 Penumpang</option>
-                    <option>4+ Penumpang</option>
-                  </select>
-                </div>
-                <div className="field flex flex-col gap-1">
-                  <label htmlFor="class-guest" className="text-xs text-white">
-                    Kelas
-                  </label>
-                  <select
-                    id="class-guest"
-                    name="class"
-                    className="rounded-full bg-background text-foreground border border-border px-2 py-1 text-sm"
-                  >
-                    <option>Ekonomi</option>
-                    <option>Bisnis</option>
-                    <option>First Class</option>
-                  </select>
-                </div>
-              </div>
-              <div className="search-footer mt-1">
-                <button
-                  className="btn btn-primary w-full rounded-full bg-card text-primary hover:bg-primary hover:text-primary-foreground py-2 font-semibold transition-colors duration-200"
-                  type="submit"
-                >
-                  Cari Penerbangan
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
 
         {/* Tujuan Terpopuler */}
         <section className="section mt-8">
