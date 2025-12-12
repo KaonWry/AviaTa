@@ -112,7 +112,7 @@ function AboutUsSection({ className }) {
   const testimonials = [
     {
       icon: "search",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      avatar: "https://i.pinimg.com/736x/f9/bd/76/f9bd7649862359ba3e7d45c4f17e9302.jpg",
       name: "Yoga",
       role: "Tim AviaTa",
       review: "AviaTa fokus membantu kamu mencari tiket pesawat dengan cepat.",
@@ -122,7 +122,7 @@ function AboutUsSection({ className }) {
       avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
       name: "Gideon",
       role: "Tim AviaTa",
-      review: "AviaTa memudahkan kamu membandingkan harga, durasi, dan fasilitas.",
+      review: "AviaTa membantu kamu mengelola tiket dan memantau perjalanan dalam satu tempat.",
     },
     {
       icon: "payment",
