@@ -19,6 +19,7 @@ import {
   MapPin
 } from "lucide-react";
 import { FlightSearchCard } from "../components/ui/flight-search-card";
+import { FlightResultCard } from "../components/ui/flight-result-card";
 
 // Format price to IDR
 function formatPrice(price) {
@@ -438,61 +439,167 @@ export function SearchFlights() {
           id: 1,
           flightNumber: 'GA402',
           airline: { code: 'GA', name: 'Garuda Indonesia', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta', city: 'Jakarta' },
-          destination: { code: 'DPS', name: 'Ngurah Rai', city: 'Bali' },
-          departureTime: '2025-12-15T08:00:00',
-          arrivalTime: '2025-12-15T10:50:00',
+          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
+          destination: { code: 'DPS', name: 'Ngurah Rai International Airport', city: 'Bali' },
+          departureTime: '2025-12-24T08:00:00',
+          arrivalTime: '2025-12-24T10:50:00',
+          departureTerminal: '3',
+          arrivalTerminal: 'D',
           price: 1500000,
           stops: 0,
-          amenities: ['baggage', 'meal', 'entertainment']
+          flightClass: 'Economy',
+          baggage: 20,
+          aircraft: 'Boeing 737-800',
+          seatLayout: '3-3',
+          seatPitch: '31',
+          hasWifi: true,
+          hasEntertainment: true,
+          hasPower: true,
+          hasMeal: true,
+          isRefundable: true,
+          isReschedulable: true,
+          rescheduleFee: 350000,
+          promos: [
+            { title: '12.12 Super Sale', shortTitle: '12.12 Sale', description: 'Unlock Exclusive Deals only on 12.12 Super Sale' },
+            { title: 'First Flight Discount', shortTitle: 'First Flight', description: 'Use code FLYAVIATA to get up to Rp 250.000 off', code: 'FLYAVIATA' }
+          ]
         },
         {
           id: 2,
           flightNumber: 'JT32',
           airline: { code: 'JT', name: 'Lion Air', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta', city: 'Jakarta' },
-          destination: { code: 'DPS', name: 'Ngurah Rai', city: 'Bali' },
-          departureTime: '2025-12-15T09:30:00',
-          arrivalTime: '2025-12-15T12:20:00',
+          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
+          destination: { code: 'DPS', name: 'Ngurah Rai International Airport', city: 'Bali' },
+          departureTime: '2025-12-24T09:30:00',
+          arrivalTime: '2025-12-24T12:20:00',
+          departureTerminal: '1A',
+          arrivalTerminal: 'D',
           price: 850000,
           stops: 0,
-          amenities: ['baggage']
+          flightClass: 'Economy',
+          baggage: 0,
+          aircraft: 'Boeing 737-900ER',
+          seatLayout: '3-3',
+          seatPitch: '29',
+          hasWifi: false,
+          hasEntertainment: false,
+          hasPower: false,
+          hasMeal: false,
+          isRefundable: false,
+          isReschedulable: true,
+          rescheduleFee: 150000,
+          promos: []
         },
         {
           id: 3,
           flightNumber: 'QG802',
           airline: { code: 'QG', name: 'Citilink', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta', city: 'Jakarta' },
-          destination: { code: 'DPS', name: 'Ngurah Rai', city: 'Bali' },
-          departureTime: '2025-12-15T14:00:00',
-          arrivalTime: '2025-12-15T16:50:00',
+          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
+          destination: { code: 'DPS', name: 'Ngurah Rai International Airport', city: 'Bali' },
+          departureTime: '2025-12-24T14:00:00',
+          arrivalTime: '2025-12-24T16:50:00',
+          departureTerminal: '2D',
+          arrivalTerminal: 'D',
           price: 750000,
           stops: 0,
-          amenities: ['baggage']
+          flightClass: 'Economy',
+          baggage: 0,
+          aircraft: 'Airbus A320',
+          seatLayout: '3-3',
+          seatPitch: '28',
+          hasWifi: false,
+          hasEntertainment: false,
+          hasPower: false,
+          hasMeal: false,
+          isRefundable: false,
+          isReschedulable: true,
+          rescheduleFee: 100000,
+          promos: [
+            { title: 'Weekend Deal', shortTitle: 'Weekend Deal', description: 'Get extra 10% off for weekend flights' }
+          ]
         },
         {
           id: 4,
           flightNumber: 'GA836',
           airline: { code: 'GA', name: 'Garuda Indonesia', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta', city: 'Jakarta' },
-          destination: { code: 'SIN', name: 'Changi', city: 'Singapore' },
-          departureTime: '2025-12-15T06:15:00',
-          arrivalTime: '2025-12-15T09:00:00',
+          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
+          destination: { code: 'SIN', name: 'Changi International Airport', city: 'Singapore' },
+          departureTime: '2025-12-24T06:15:00',
+          arrivalTime: '2025-12-24T09:00:00',
+          departureTerminal: '3',
+          arrivalTerminal: '3',
           price: 2500000,
           stops: 0,
-          amenities: ['baggage', 'meal', 'wifi', 'entertainment']
+          flightClass: 'Economy',
+          baggage: 30,
+          aircraft: 'Airbus A330-300',
+          seatLayout: '2-4-2',
+          seatPitch: '32',
+          hasWifi: true,
+          hasEntertainment: true,
+          hasPower: true,
+          hasMeal: true,
+          isRefundable: true,
+          isReschedulable: true,
+          rescheduleFee: 500000,
+          promos: [
+            { title: 'International Route Promo', shortTitle: 'Intl Promo', description: 'Special price for international routes', code: 'GOFLYINT' }
+          ]
         },
         {
           id: 5,
-          flightNumber: 'SQ950',
+          flightNumber: 'QZ260',
+          airline: { code: 'QZ', name: 'AirAsia Indonesia', logo: null },
+          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
+          destination: { code: 'SIN', name: 'Changi International Airport', city: 'Singapore' },
+          departureTime: '2025-12-24T16:30:00',
+          arrivalTime: '2025-12-24T19:20:00',
+          departureTerminal: '2F',
+          arrivalTerminal: '4',
+          price: 2400800,
+          stops: 0,
+          flightClass: 'Economy',
+          baggage: 0,
+          aircraft: 'Airbus A320-100/200',
+          seatLayout: '3-3',
+          seatPitch: '28',
+          hasWifi: true,
+          hasEntertainment: false,
+          hasPower: false,
+          hasMeal: false,
+          isRefundable: false,
+          isReschedulable: true,
+          rescheduleFee: 773099,
+          promos: [
+            { title: '12.12 Super Sale', shortTitle: '12.12 Sale', description: 'Unlock Exclusive Deals only on 12.12 Super Sale' },
+            { title: 'Code FLYOVERSEANOW for your first flight!', shortTitle: 'First Flight', description: 'Booking your first flight? Use the code to get up to Rp 250.000 off', code: 'FLYOVERSEANOW' }
+          ]
+        },
+        {
+          id: 6,
+          flightNumber: 'SQ951',
           airline: { code: 'SQ', name: 'Singapore Airlines', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta', city: 'Jakarta' },
-          destination: { code: 'SIN', name: 'Changi', city: 'Singapore' },
-          departureTime: '2025-12-15T10:30:00',
-          arrivalTime: '2025-12-15T13:15:00',
+          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
+          destination: { code: 'SIN', name: 'Changi International Airport', city: 'Singapore' },
+          departureTime: '2025-12-24T10:30:00',
+          arrivalTime: '2025-12-24T13:15:00',
+          departureTerminal: '3',
+          arrivalTerminal: '2',
           price: 3200000,
           stops: 0,
-          amenities: ['baggage', 'meal', 'wifi', 'entertainment']
+          flightClass: 'Economy',
+          baggage: 30,
+          aircraft: 'Boeing 787-10',
+          seatLayout: '3-3-3',
+          seatPitch: '32',
+          hasWifi: true,
+          hasEntertainment: true,
+          hasPower: true,
+          hasMeal: true,
+          isRefundable: true,
+          isReschedulable: true,
+          rescheduleFee: 800000,
+          promos: []
         },
       ];
 
@@ -603,7 +710,7 @@ export function SearchFlights() {
             ) : filteredFlights.length > 0 ? (
               <div className="space-y-4">
                 {filteredFlights.map((flight) => (
-                  <FlightCard 
+                  <FlightResultCard 
                     key={flight.id} 
                     flight={flight} 
                     onSelect={handleSelectFlight}

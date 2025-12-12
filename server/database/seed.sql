@@ -1,16 +1,18 @@
 -- =============================================
--- AviaTa Database Seed Data v2.0
+-- AviaTa Database Seed Data v3.0
+-- With Promos and Refund Policies
 -- =============================================
 
 -- Seed Airlines
 INSERT INTO airlines (name, code, logo_url) VALUES
 ('Garuda Indonesia', 'GA', 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e4/Garuda_Indonesia_logo.svg/1200px-Garuda_Indonesia_logo.svg.png'),
 ('Singapore Airlines', 'SQ', 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6b/Singapore_Airlines_Logo_2.svg/1200px-Singapore_Airlines_Logo_2.svg.png'),
-('AirAsia', 'AK', 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/AirAsia_New_Logo.svg/1200px-AirAsia_New_Logo.svg.png'),
+('AirAsia Indonesia', 'QZ', 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/AirAsia_New_Logo.svg/1200px-AirAsia_New_Logo.svg.png'),
 ('Lion Air', 'JT', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Lion_Air_logo.svg/1200px-Lion_Air_logo.svg.png'),
 ('Japan Airlines', 'JL', 'https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Japan_Airlines_Logo_%282011%29.svg/1200px-Japan_Airlines_Logo_%282011%29.svg.png'),
 ('Batik Air', 'ID', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Batik_Air_logo.svg/1200px-Batik_Air_logo.svg.png'),
-('Citilink', 'QG', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Citilink_logo.svg/1200px-Citilink_logo.svg.png')
+('Citilink', 'QG', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Citilink_logo.svg/1200px-Citilink_logo.svg.png'),
+('AirAsia', 'AK', 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/AirAsia_New_Logo.svg/1200px-AirAsia_New_Logo.svg.png')
 ON DUPLICATE KEY UPDATE name=name;
 
 -- Seed Airports
@@ -84,3 +86,54 @@ ON DUPLICATE KEY UPDATE email=email;
 INSERT INTO saved_passengers (user_id, title, first_name, last_name, nationality, id_type, id_number) VALUES
 (1, 'Mr', 'Demo', 'User', 'Indonesia', 'ktp', '3171234567890001')
 ON DUPLICATE KEY UPDATE first_name=first_name;
+
+-- Seed Promos
+INSERT INTO promos (code, title, short_title, description, discount_type, discount_value, max_discount, min_purchase, start_date, end_date, usage_limit, is_active, applies_to) VALUES
+('SUPERSALE1212', '12.12 Super Sale', '12.12 Sale', 'Unlock Exclusive Deals only on 12.12 Super Sale! Get up to 50% off on selected flights.', 'percentage', 50, 500000, 500000, '2025-12-01 00:00:00', '2025-12-31 23:59:59', 10000, TRUE, 'all'),
+('FLYAVIATA', 'First Flight Discount', 'First Flight', 'Booking your first flight? Use code FLYAVIATA to get up to Rp 250.000 off your first flight booking!', 'fixed', 250000, 250000, 1000000, '2025-01-01 00:00:00', '2025-12-31 23:59:59', NULL, TRUE, 'all'),
+('FLYOVERSEANOW', 'Overseas First Flight', 'Fly Overseas', 'Use the code FLYOVERSEANOW to get up to Rp 250.000 off your first international flight!', 'fixed', 250000, 250000, 1500000, '2025-01-01 00:00:00', '2025-12-31 23:59:59', NULL, TRUE, 'international'),
+('WEEKENDFLY', 'Weekend Getaway', 'Weekend Deal', 'Get extra 10% off for weekend flights. Valid for Friday to Sunday departures.', 'percentage', 10, 200000, 750000, '2025-01-01 00:00:00', '2025-12-31 23:59:59', NULL, TRUE, 'all'),
+('GOFLYINT', 'International Route Promo', 'Intl Promo', 'Special price for international routes! Save up to Rp 500.000 on selected routes.', 'fixed', 500000, 500000, 2000000, '2025-12-01 00:00:00', '2026-03-31 23:59:59', 5000, TRUE, 'international'),
+('DOMESTIC25', 'Domestic Discount 25%', 'Domestic 25%', 'Get 25% off on all domestic flights! Maximum discount Rp 300.000.', 'percentage', 25, 300000, 500000, '2025-12-01 00:00:00', '2025-12-31 23:59:59', 8000, TRUE, 'domestic'),
+('NEWYEAR2026', 'New Year Special', 'New Year', 'Ring in the New Year with special discounts! Get 15% off on all flights.', 'percentage', 15, 400000, 1000000, '2025-12-25 00:00:00', '2026-01-07 23:59:59', 5000, TRUE, 'all')
+ON DUPLICATE KEY UPDATE title=title;
+
+-- Seed Refund Policies (Default policies for different airlines)
+-- Garuda Indonesia (Full Service)
+INSERT INTO refund_policies (airline_id, flight_class_id, hours_before_departure, refund_percentage, admin_fee, is_active) VALUES
+(1, 1, 72, 75, 100000, TRUE),
+(1, 1, 24, 50, 100000, TRUE),
+(1, 1, 0, 25, 150000, TRUE),
+(1, 2, 72, 80, 150000, TRUE),
+(1, 2, 24, 60, 150000, TRUE),
+(1, 2, 0, 30, 200000, TRUE),
+(1, 3, 72, 90, 200000, TRUE),
+(1, 3, 24, 75, 200000, TRUE),
+(1, 3, 0, 50, 250000, TRUE);
+
+-- Lion Air (Low Cost Carrier - more restrictive)
+INSERT INTO refund_policies (airline_id, flight_class_id, hours_before_departure, refund_percentage, admin_fee, is_active) VALUES
+(4, 1, 72, 50, 150000, TRUE),
+(4, 1, 24, 25, 150000, TRUE),
+(4, 1, 0, 0, 200000, TRUE);
+
+-- Citilink (Low Cost Carrier)
+INSERT INTO refund_policies (airline_id, flight_class_id, hours_before_departure, refund_percentage, admin_fee, is_active) VALUES
+(7, 1, 72, 50, 100000, TRUE),
+(7, 1, 24, 25, 100000, TRUE),
+(7, 1, 0, 0, 150000, TRUE);
+
+-- AirAsia Indonesia (Low Cost Carrier)
+INSERT INTO refund_policies (airline_id, flight_class_id, hours_before_departure, refund_percentage, admin_fee, is_active) VALUES
+(3, 1, 72, 40, 175000, TRUE),
+(3, 1, 24, 20, 175000, TRUE),
+(3, 1, 0, 0, 200000, TRUE);
+
+-- Singapore Airlines (Premium)
+INSERT INTO refund_policies (airline_id, flight_class_id, hours_before_departure, refund_percentage, admin_fee, is_active) VALUES
+(2, 1, 72, 85, 150000, TRUE),
+(2, 1, 24, 65, 150000, TRUE),
+(2, 1, 0, 40, 200000, TRUE),
+(2, 3, 72, 95, 200000, TRUE),
+(2, 3, 24, 80, 200000, TRUE),
+(2, 3, 0, 60, 250000, TRUE);
