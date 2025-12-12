@@ -48,7 +48,7 @@ const Home = () => {
   }, [country]);
 
   return (
-    <div className="page min-h-screen flex flex-col bg-[#FBFBFB] text-black">
+    <div className="page min-h-screen flex flex-col bg-[#FBFBFB] text-black pt-24">
       {/* Header ...existing code... */}
       <header className="site-header bg-white border-b border-[#E0E0E0]">
         <nav className="navbar flex items-center justify-between gap-4 px-6 py-2">
