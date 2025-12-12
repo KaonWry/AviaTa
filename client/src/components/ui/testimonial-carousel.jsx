@@ -60,7 +60,7 @@ const TestimonialCarousel = React.forwardRef(
                   </h5>
                   
                   {/* Avatar */}
-                  <div className="mt-5 relative size-14 rounded-full overflow-hidden bg-muted border-2 border-primary/20">
+                  <div className="mt-5 relative size-20 rounded-full overflow-hidden bg-muted border-2 border-primary/20">
                     <img
                       src={testimonial.avatar}
                       alt={testimonial.name}
@@ -118,7 +118,7 @@ function AboutUsSection({ className }) {
     },
     {
       icon: "payment",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      avatar: "https://pbs.twimg.com/media/GukOAG8XUAErZf-?format=jpg&name=medium",
       name: "Pras",
       role: "Tim AviaTa",
       review: "AviaTa memastikan proses pilih penerbangan sampai pembayaran tetap simpel.",
