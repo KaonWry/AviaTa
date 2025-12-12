@@ -27,8 +27,11 @@ app.post('/api/register', async (req, res) => {
     // Insert new user
     await db.query('INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)', [name, email, password]);
     // Get the new user
-    const [rows] = await db.query('SELECT full_name FROM users WHERE email = ? LIMIT 1', [email]);
-    return res.json({ success: true, username: rows[0].username });
+    const [rows] = await db.query(
+      'SELECT id, full_name, email, avatar_url, gender, birth_date, city FROM users WHERE email = ? LIMIT 1',
+      [email]
+    );
+    return res.json({ success: true, user: rows[0] });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Server error', details: error.message });
@@ -44,7 +47,7 @@ app.post('/api/login', async (req, res) => {
   try {
     // Find user by email
     const [rows] = await db.query(
-      'SELECT username, email, password FROM users WHERE email = ? LIMIT 1',
+      'SELECT id, full_name, email, avatar_url, gender, birth_date, city, password FROM users WHERE email = ? LIMIT 1',
       [id]
     );
     if (rows.length === 0) {
@@ -55,13 +58,35 @@ app.post('/api/login', async (req, res) => {
     if (user.password !== password) {
       return res.status(401).json({ success: false, error: 'Email atau password salah.' });
     }
-    return res.json({ success: true, username: user.username });
+    const { password: _pw, ...safeUser } = user;
+    return res.json({ success: true, user: safeUser });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Server error', details: error.message });
   }
 });
 
+// Get user profile by id
+app.get('/api/user/profile', async (req, res) => {
+  const { id } = req.query;
+  const userId = Number.parseInt(String(id), 10);
+  if (!Number.isFinite(userId)) {
+    return res.status(400).json({ error: 'User id is required.' });
+  }
+  try {
+    const [rows] = await db.query(
+      'SELECT id, full_name, email, avatar_url, gender, birth_date, city FROM users WHERE id = ? LIMIT 1',
+      [userId]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    return res.json({ success: true, user: rows[0] });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error', details: error.message });
+  }
+});
 
 // Test DB Connection
 app.get('/api/test-db', async (req, res) => {
@@ -73,16 +98,17 @@ app.get('/api/test-db', async (req, res) => {
     res.status(500).json({ error: 'Database connection failed', details: error.message });
   }
 });
-// Update user profile endpoint
+
+// Update user profile endpoint (by id)
 app.put('/api/user/profile', async (req, res) => {
-  const { email, full_name, gender, birth_date, city } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required.' });
+  const { id, full_name, gender, birth_date, city } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: 'User id is required.' });
   }
   try {
     const [result] = await db.query(
-      'UPDATE users SET full_name = ?, gender = ?, birth_date = ?, city = ? WHERE email = ?',
-      [full_name, gender, birth_date, city, email]
+      'UPDATE users SET full_name = ?, gender = ?, birth_date = ?, city = ? WHERE id = ?',
+      [full_name, gender, birth_date, city, id]
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'User not found.' });

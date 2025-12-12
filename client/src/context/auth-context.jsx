@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom";
 
@@ -9,6 +10,7 @@ const AuthContext = createContext({
   login: () => {},
   logout: () => {},
   register: () => {},
+  updateUser: () => {},
 });
 
 export function AuthProvider({ children, storageKey = "aviata-auth" }) {
@@ -37,19 +39,30 @@ export function AuthProvider({ children, storageKey = "aviata-auth" }) {
     checkAuth();
   }, [storageKey]);
 
+  const updateUser = (nextUser) => {
+    setUser(nextUser);
+    if (nextUser) {
+      localStorage.setItem(storageKey, JSON.stringify(nextUser));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  };
+
   const login = async (email, password) => {
     try {
-      // TODO: Replace with actual API call
-      // For now, simulate a successful login
-      const userData = {
-        id: 1,
-        name: email.split("@")[0],
-        email: email,
-        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${email}`,
-      };
-      
-      setUser(userData);
-      localStorage.setItem(storageKey, JSON.stringify(userData));
+      const res = await fetch("http://localhost:3001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: email, password })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || "Login gagal." };
+      }
+      if (!data.user) {
+        return { success: false, error: "Gagal mengambil data user." };
+      }
+      updateUser(data.user);
       return { success: true };
     } catch (error) {
       console.error("Login error:", error);
@@ -57,18 +70,21 @@ export function AuthProvider({ children, storageKey = "aviata-auth" }) {
     }
   };
 
-  const register = async (name, email, password) => {
+  const register = async (name, email, password, passwordConfirm) => {
     try {
-      // TODO: Replace with actual API call
-      const userData = {
-        id: Date.now(),
-        name: name,
-        email: email,
-        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${name}`,
-      };
-      
-      setUser(userData);
-      localStorage.setItem(storageKey, JSON.stringify(userData));
+      const res = await fetch("http://localhost:3001/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, passwordConfirm })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || "Registrasi gagal." };
+      }
+      if (!data.user) {
+        return { success: false, error: "Gagal mengambil data user." };
+      }
+      updateUser(data.user);
       return { success: true };
     } catch (error) {
       console.error("Register error:", error);
@@ -77,8 +93,7 @@ export function AuthProvider({ children, storageKey = "aviata-auth" }) {
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem(storageKey);
+    updateUser(null);
     // navigate("/");
   };
 
@@ -90,7 +105,8 @@ export function AuthProvider({ children, storageKey = "aviata-auth" }) {
         isLoading,
         login, 
         logout, 
-        register 
+        register,
+        updateUser,
       }}
     >
       {children}

@@ -16,6 +16,7 @@ import { AccountSidebar } from "../components/ui/account-sidebar";
 // Custom Select Component
 function CustomSelect({ label, value, onChange, options, placeholder }) {
   const [isOpen, setIsOpen] = useState(false);
+  const MotionDiv = motion.div;
 
   return (
     <div className="relative">
@@ -33,7 +34,7 @@ function CustomSelect({ label, value, onChange, options, placeholder }) {
       
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -55,7 +56,7 @@ function CustomSelect({ label, value, onChange, options, placeholder }) {
                 {option.label}
               </button>
             ))}
-          </motion.div>
+          </MotionDiv>
         )}
       </AnimatePresence>
     </div>
@@ -65,6 +66,8 @@ function CustomSelect({ label, value, onChange, options, placeholder }) {
 // Personal Data Form
 // import { useState } from "react";
 function PersonalDataForm({ user }) {
+  const { updateUser } = useAuth();
+
   // Parse birth_date (YYYY-MM-DD) if available
   let birthDay = "";
   let birthMonth = "";
@@ -122,7 +125,7 @@ function PersonalDataForm({ user }) {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: user?.email,
+          id: user?.id,
           full_name: formData.fullName,
           gender: genderValue,
           birth_date,
@@ -131,11 +134,21 @@ function PersonalDataForm({ user }) {
       });
       const data = await res.json();
       if (data.success) {
+        // Fetch updated user profile (by id) and refresh session
+        if (user?.id) {
+          const profileRes = await fetch(
+            `http://localhost:3001/api/user/profile?id=${encodeURIComponent(String(user.id))}`
+          );
+          const profileData = await profileRes.json();
+          if (profileRes.ok && profileData.success) {
+            updateUser(profileData.user);
+          }
+        }
         setSuccess(true);
       } else {
         setError(data.error || "Gagal menyimpan data.");
       }
-    } catch (err) {
+    } catch {
       setError("Gagal menyimpan data.");
     } finally {
       setSaving(false);
