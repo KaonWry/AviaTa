@@ -11,6 +11,7 @@ import { Home as HomeIcon, Search, Ticket, User } from "lucide-react";
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
+const Account = lazy(() => import("./pages/Account"));
 
 const navItems = [
   { name: "Beranda", url: "/", icon: HomeIcon },
@@ -34,6 +35,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/profile" element={<Account />} />
           </Routes>
         </Suspense>
       </main>
