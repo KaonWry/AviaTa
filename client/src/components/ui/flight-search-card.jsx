@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { 
-  PlaneTakeoff, 
-  PlaneLanding, 
   ArrowLeftRight, 
   Users, 
   ChevronDown,
@@ -12,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { FlightDatePicker } from "./flight-date-picker";
+import { AirportSearchInput } from "./airport-search-input";
 
 // Trip Type Toggle Component
 function TripTypeToggle({ tripType, setTripType }) {
@@ -45,33 +44,22 @@ function TripTypeToggle({ tripType, setTripType }) {
   );
 }
 
-// Location Input Component
-function LocationInput({ icon: IconComponent, placeholder, value, onChange, name, id }) {
-  return (
-    <div className="flex items-center gap-3 px-4 py-3 border border-border rounded-lg bg-background hover:border-primary/50 transition-colors group">
-      <IconComponent className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-      <input
-        type="text"
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-sm"
-      />
-    </div>
-  );
-}
+
 
 // Swap Button Component
 function SwapButton({ onClick }) {
   return (
     <button
       type="button"
-      onClick={onClick}
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-background border border-border shadow-sm flex items-center justify-center hover:bg-muted hover:border-primary/50 transition-all"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      }}
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[500] w-10 h-10 rounded-full bg-card border-2 border-primary/50 shadow-xl flex items-center justify-center hover:bg-primary hover:border-primary hover:scale-110 active:scale-95 transition-all duration-200 group cursor-pointer"
+      aria-label="Tukar bandara keberangkatan dan tujuan"
     >
-      <ArrowLeftRight className="w-4 h-4 text-muted-foreground" />
+      <ArrowLeftRight className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
     </button>
   );
 }
@@ -237,6 +225,8 @@ export function FlightSearchCard({ className }) {
   const [tripType, setTripType] = useState("one-way");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [fromAirport, setFromAirport] = useState(null);
+  const [toAirport, setToAirport] = useState(null);
   const [departureDate, setDepartureDate] = useState(null);
   const [returnDate, setReturnDate] = useState(null);
   const [passengers, setPassengers] = useState({
@@ -247,17 +237,24 @@ export function FlightSearchCard({ className }) {
   const [flightClass, setFlightClass] = useState("economy");
 
   const handleSwap = () => {
-    const temp = from;
+    // Swap display values
+    const tempFrom = from;
     setFrom(to);
-    setTo(temp);
+    setTo(tempFrom);
+    // Swap airport objects
+    const tempAirport = fromAirport;
+    setFromAirport(toAirport);
+    setToAirport(tempAirport);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Build search params
+    // Build search params with airport codes if available
     const params = new URLSearchParams({
-      from,
-      to,
+      from: fromAirport?.code || from,
+      to: toAirport?.code || to,
+      fromCity: fromAirport?.city || "",
+      toCity: toAirport?.city || "",
       departure: departureDate,
       ...(tripType === "round-trip" && { return: returnDate }),
       adults: passengers.adults,
@@ -270,32 +267,32 @@ export function FlightSearchCard({ className }) {
   };
 
   return (
-    <div className={cn("bg-card rounded-2xl shadow-xl p-6 border border-border", className)}>
+    <div className={cn("bg-card rounded-2xl shadow-xl p-6 border border-border overflow-visible", className)}>
       {/* Trip Type Toggle */}
       <TripTypeToggle tripType={tripType} setTripType={setTripType} />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 overflow-visible">
         {/* From / To Row */}
-        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4">
-          <LocationInput
-            icon={PlaneTakeoff}
-            placeholder="Terbang dari"
+        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4 overflow-visible">
+          <AirportSearchInput
+            type="departure"
+            placeholder="Terbang dari mana?"
             value={from}
-            onChange={(e) => setFrom(e.target.value)}
+            onChange={setFrom}
+            onAirportSelect={(airport) => setFromAirport(airport)}
             name="from"
             id="from"
           />
           
-          {/* Swap Button - Only visible on md+ */}
-          <div className="hidden md:block">
-            <SwapButton onClick={handleSwap} />
-          </div>
+          {/* Swap Button - Positioned in the middle */}
+          <SwapButton onClick={handleSwap} />
           
-          <LocationInput
-            icon={PlaneLanding}
-            placeholder="Terbang ke"
+          <AirportSearchInput
+            type="arrival"
+            placeholder="Mau ke mana?"
             value={to}
-            onChange={(e) => setTo(e.target.value)}
+            onChange={setTo}
+            onAirportSelect={(airport) => setToAirport(airport)}
             name="to"
             id="to"
           />
