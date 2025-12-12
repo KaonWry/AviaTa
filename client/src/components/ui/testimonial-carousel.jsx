@@ -26,7 +26,13 @@ const TestimonialCarousel = React.forwardRef(
     }, [api])
 
     return (
-      <div ref={ref} className={cn("py-16", className)} {...props}>
+      <div
+        ref={ref}
+        className={cn("py-16 select-none", className)}
+        style={{ WebkitUserSelect: 'none', userSelect: 'none', MozUserSelect: 'none', msUserSelect: 'none' }}
+        draggable={false}
+        {...props}
+      >
         <Carousel
           setApi={setApi}
           className="max-w-screen-xl mx-auto px-4 lg:px-8"
@@ -37,7 +43,9 @@ const TestimonialCarousel = React.forwardRef(
               return (
                 <CarouselItem
                   key={testimonial.name}
-                  className="flex flex-col items-center cursor-grab"
+                  className="flex flex-col items-center cursor-grab select-none"
+                  style={{ WebkitUserSelect: 'none', userSelect: 'none', MozUserSelect: 'none', msUserSelect: 'none' }}
+                  draggable={false}
                 >
                   {/* Icon instead of company logo */}
                   <div className="mb-7 flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 dark:bg-primary/20">
@@ -60,7 +68,7 @@ const TestimonialCarousel = React.forwardRef(
                   </h5>
                   
                   {/* Avatar */}
-                  <div className="mt-5 relative size-20 rounded-full overflow-hidden bg-muted border-2 border-primary/20">
+                  <div className="mt-5 relative size-24 rounded-full overflow-hidden bg-muted border-2 border-primary/20">
                     <img
                       src={testimonial.avatar}
                       alt={testimonial.name}
