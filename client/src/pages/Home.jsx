@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { DestinationGrid } from "../components/ui/destination-card";
 
 const COUNTRY_LIST = ["Singapore", "Malaysia", "Japan", "Korea Utara"];
 
@@ -259,30 +260,11 @@ const Home = () => {
               Tujuan Terpopuler
             </h2>
           </div>
-          <div className="card-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {loadingPopular ? (
-              <div className="col-span-4 text-center py-6 text-sm text-gray-500">
-                Memuat...
-              </div>
-            ) : (
-              popularDestinations.map((item, idx) => (
-                <article
-                  key={idx}
-                  className="card-destination bg-white rounded-lg border border-[#E0E0E0] p-3 flex flex-col gap-2"
-                >
-                  <div className="card-thumb h-[90px] rounded-lg border-2 border-dashed border-[#b0b0b0] flex items-center justify-center text-xs text-[#7a7a7a]">
-                    Gambar destinasi
-                  </div>
-                  <div className="card-title text-sm font-medium">
-                    {item.title}
-                  </div>
-                  <div className="card-desc text-xs text-[#666]">
-                    {item.desc}
-                  </div>
-                </article>
-              ))
-            )}
-          </div>
+          <DestinationGrid 
+            destinations={popularDestinations} 
+            loading={loadingPopular}
+            emptyMessage="Tidak ada destinasi populer."
+          />
         </section>
 
         {/* Country Section */}
@@ -294,11 +276,11 @@ const Home = () => {
                 <button
                   key={c}
                   type="button"
-                  className={`px-3 py-1 rounded-full border text-xs cursor-pointer
+                  className={`px-3 py-1 rounded-full border text-xs cursor-pointer transition-all duration-200
                     ${
                       country === c
-                        ? "bg-[#4A70A9] text-white border-[#4A70A9]"
-                        : "bg-white text-black border-[#E0E0E0]"
+                        ? "bg-[#4A70A9] text-white border-[#4A70A9] shadow-md"
+                        : "bg-white text-black border-[#E0E0E0] hover:border-[#4A70A9] hover:text-[#4A70A9]"
                     }
                   `}
                   onClick={() => setCountry(c)}
@@ -309,37 +291,11 @@ const Home = () => {
               ))}
             </div>
           </div>
-          <div
-            className="card-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
-            data-country-list
-          >
-            {loadingCountry ? (
-              <div className="col-span-4 text-center py-6 text-sm text-gray-500">
-                Memuat...
-              </div>
-            ) : countryDestinations.length === 0 ? (
-              <div className="col-span-4 text-center py-6 text-sm text-gray-500">
-                Tidak ada destinasi untuk negara ini.
-              </div>
-            ) : (
-              countryDestinations.map((item, idx) => (
-                <article
-                  key={idx}
-                  className="card-destination bg-white rounded-lg border border-[#E0E0E0] p-3 flex flex-col gap-2"
-                >
-                  <div className="card-thumb h-[90px] rounded-lg border-2 border-dashed border-[#b0b0b0] flex items-center justify-center text-xs text-[#7a7a7a]">
-                    Gambar destinasi
-                  </div>
-                  <div className="card-title text-sm font-medium">
-                    {item.title}
-                  </div>
-                  <div className="card-desc text-xs text-[#666]">
-                    {item.desc}
-                  </div>
-                </article>
-              ))
-            )}
-          </div>
+          <DestinationGrid 
+            destinations={countryDestinations} 
+            loading={loadingCountry}
+            emptyMessage="Tidak ada destinasi untuk negara ini."
+          />
         </section>
       </main>
 
