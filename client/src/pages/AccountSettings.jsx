@@ -244,7 +244,7 @@ export function AccountSettings() {
 
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const emails = [
