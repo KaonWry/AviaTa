@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { 
-  PlaneTakeoff, 
-  PlaneLanding, 
   ArrowLeftRight, 
   Users, 
   ChevronDown,
@@ -12,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { FlightDatePicker } from "./flight-date-picker";
+import { AirportSearchInput } from "./airport-search-input";
 
 // Trip Type Toggle Component
 function TripTypeToggle({ tripType, setTripType }) {
@@ -45,23 +44,7 @@ function TripTypeToggle({ tripType, setTripType }) {
   );
 }
 
-// Location Input Component
-function LocationInput({ icon: IconComponent, placeholder, value, onChange, name, id }) {
-  return (
-    <div className="flex items-center gap-3 px-4 py-3 border border-border rounded-lg bg-background hover:border-primary/50 transition-colors group">
-      <IconComponent className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-      <input
-        type="text"
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground text-sm"
-      />
-    </div>
-  );
-}
+
 
 // Swap Button Component
 function SwapButton({ onClick }) {
@@ -237,6 +220,8 @@ export function FlightSearchCard({ className }) {
   const [tripType, setTripType] = useState("one-way");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [fromAirport, setFromAirport] = useState(null);
+  const [toAirport, setToAirport] = useState(null);
   const [departureDate, setDepartureDate] = useState(null);
   const [returnDate, setReturnDate] = useState(null);
   const [passengers, setPassengers] = useState({
@@ -247,17 +232,24 @@ export function FlightSearchCard({ className }) {
   const [flightClass, setFlightClass] = useState("economy");
 
   const handleSwap = () => {
-    const temp = from;
+    // Swap display values
+    const tempFrom = from;
     setFrom(to);
-    setTo(temp);
+    setTo(tempFrom);
+    // Swap airport objects
+    const tempAirport = fromAirport;
+    setFromAirport(toAirport);
+    setToAirport(tempAirport);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Build search params
+    // Build search params with airport codes if available
     const params = new URLSearchParams({
-      from,
-      to,
+      from: fromAirport?.code || from,
+      to: toAirport?.code || to,
+      fromCity: fromAirport?.city || "",
+      toCity: toAirport?.city || "",
       departure: departureDate,
       ...(tripType === "round-trip" && { return: returnDate }),
       adults: passengers.adults,
@@ -277,11 +269,12 @@ export function FlightSearchCard({ className }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* From / To Row */}
         <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4">
-          <LocationInput
-            icon={PlaneTakeoff}
-            placeholder="Terbang dari"
+          <AirportSearchInput
+            type="departure"
+            placeholder="Terbang dari mana?"
             value={from}
-            onChange={(e) => setFrom(e.target.value)}
+            onChange={setFrom}
+            onAirportSelect={(airport) => setFromAirport(airport)}
             name="from"
             id="from"
           />
@@ -291,11 +284,12 @@ export function FlightSearchCard({ className }) {
             <SwapButton onClick={handleSwap} />
           </div>
           
-          <LocationInput
-            icon={PlaneLanding}
-            placeholder="Terbang ke"
+          <AirportSearchInput
+            type="arrival"
+            placeholder="Mau ke mana?"
             value={to}
-            onChange={(e) => setTo(e.target.value)}
+            onChange={setTo}
+            onAirportSelect={(airport) => setToAirport(airport)}
             name="to"
             id="to"
           />
