@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion"; // eslint-disable-line no-unused-vars
+import TicketTypeModal from "TicketTypeModal"; // sesuaikan path
 import { 
   Plane,
   Luggage,
@@ -603,8 +604,8 @@ function PromosTab({ flight }) {
 
 // Main Flight Result Card Component
 export function FlightResultCard({ flight, onSelect }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState('details');
+  const [ticketOpen, setTicketOpen] = useState(false);
+  const [activeFlight, setActiveFlight] = useState(null);
 
   const tabs = [
     { id: 'details', label: 'Flight Details' },
@@ -721,7 +722,11 @@ export function FlightResultCard({ flight, onSelect }) {
           </div>
           
           <button
-            onClick={() => onSelect(flight)}
+            onClick={() => {
+              setActiveFlight(flight);
+              setTicketOpen(true);
+            }}
+
             className="ml-4 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors shrink-0"
           >
             Choose
@@ -754,6 +759,19 @@ export function FlightResultCard({ flight, onSelect }) {
                 Hide Details
               </button>
             </div>
+            <TicketTypeModal
+              open={ticketOpen}
+              flight={activeFlight}
+              onClose={() => {
+                setTicketOpen(false);
+                setActiveFlight(null);
+              }}
+              onSelect={(picked) => {
+                setTicketOpen(false);
+                setActiveFlight(null);
+                onSelect?.(picked); // lanjut flow kamu (set selected flight, navigate, dll)
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
