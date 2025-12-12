@@ -63,15 +63,30 @@ function CustomSelect({ label, value, onChange, options, placeholder }) {
 }
 
 // Personal Data Form
+// import { useState } from "react";
 function PersonalDataForm({ user }) {
+  // Parse birth_date (YYYY-MM-DD) if available
+  let birthDay = "";
+  let birthMonth = "";
+  let birthYear = "";
+  if (user?.birth_date) {
+    const [y, m, d] = user.birth_date.split("-");
+    birthDay = d;
+    birthMonth =
+      ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][parseInt(m, 10) - 1];
+    birthYear = y;
+  }
   const [formData, setFormData] = useState({
-    fullName: user?.name || "",
-    gender: "Laki-laki",
-    birthDay: "31",
-    birthMonth: "Oktober",
-    birthYear: "2005",
-    city: ""
+    fullName: user?.full_name || user?.name || "",
+    gender: user?.gender || "Laki-laki",
+    birthDay: birthDay || "1",
+    birthMonth: birthMonth || "Januari",
+    birthYear: birthYear || "2000",
+    city: user?.city || ""
   });
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const days = Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }));
   const months = [
@@ -87,11 +102,50 @@ function PersonalDataForm({ user }) {
     { value: "Perempuan", label: "Perempuan" }
   ];
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSuccess(false);
+    // Convert to YYYY-MM-DD
+    const monthNum = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ].indexOf(formData.birthMonth) + 1;
+    const birth_date = `${formData.birthYear}-${String(monthNum).padStart(2, "0")}-${String(formData.birthDay).padStart(2, "0")}`;
+    // Convert gender to 'male' or 'female'
+    let genderValue = formData.gender;
+    if (genderValue.toLowerCase() === "laki-laki") genderValue = "male";
+    if (genderValue.toLowerCase() === "perempuan") genderValue = "female";
+    try {
+      const res = await fetch("http://localhost:3001/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user?.email,
+          full_name: formData.fullName,
+          gender: genderValue,
+          birth_date,
+          city: formData.city
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuccess(true);
+      } else {
+        setError(data.error || "Gagal menyimpan data.");
+      }
+    } catch (err) {
+      setError("Gagal menyimpan data.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-6">
       <h3 className="font-bold text-lg text-foreground mb-6">Data Pribadi</h3>
-      
-      <div className="space-y-6">
+      <form className="space-y-6" onSubmit={handleSubmit}>
         {/* Full Name */}
         <div>
           <label className="block text-sm text-muted-foreground mb-1">Nama Lengkap</label>
@@ -152,14 +206,16 @@ function PersonalDataForm({ user }) {
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3">
-          <button className="px-6 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <button type="button" className="px-6 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             Nanti saja
           </button>
-          <button className="px-6 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors">
-            Simpan
+          <button type="submit" className="px-6 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors" disabled={saving}>
+            {saving ? "Menyimpan..." : "Simpan"}
           </button>
         </div>
-      </div>
+        {success && <div className="text-green-600 text-sm mt-2">Data berhasil disimpan!</div>}
+        {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+      </form>
     </div>
   );
 }

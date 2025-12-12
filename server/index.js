@@ -73,6 +73,26 @@ app.get('/api/test-db', async (req, res) => {
     res.status(500).json({ error: 'Database connection failed', details: error.message });
   }
 });
+// Update user profile endpoint
+app.put('/api/user/profile', async (req, res) => {
+  const { email, full_name, gender, birth_date, city } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+  try {
+    const [result] = await db.query(
+      'UPDATE users SET full_name = ?, gender = ?, birth_date = ?, city = ? WHERE email = ?',
+      [full_name, gender, birth_date, city, email]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    return res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error', details: error.message });
+  }
+});
 
 // Dummy API endpoint for username (default guest session)
 app.get('/api/username', (req, res) => {
