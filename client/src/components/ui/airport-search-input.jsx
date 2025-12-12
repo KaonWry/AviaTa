@@ -177,7 +177,7 @@ const defaultAirports = [
  * @param {string} props.value - Current selected value (airport code or display text)
  * @param {function} props.onChange - Callback when airport is selected
  * @param {function} props.onAirportSelect - Callback with full airport object
- * @param {Airport[]} props.airports - List of airports to search from
+ * @param {Airport[]} props.airports - List of airports to search from (optional, will fetch from API if not provided)
  * @param {string} props.label - Optional label above input
  * @param {string} props.name - Input name attribute
  * @param {string} props.id - Input id attribute
@@ -189,7 +189,7 @@ function AirportSearchInput({
   value = "",
   onChange,
   onAirportSelect,
-  airports = defaultAirports,
+  airports: propAirports,
   label,
   name,
   id,
@@ -200,11 +200,47 @@ function AirportSearchInput({
   const [isFocused, setIsFocused] = useState(false);
   const [selectedAirport, setSelectedAirport] = useState(null);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [airportsData, setAirportsData] = useState(propAirports || defaultAirports);
+  const [isLoadingAirports, setIsLoadingAirports] = useState(false);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
   const debouncedQuery = useDebounce(query, 200);
 
   const IconComponent = type === "departure" ? PlaneTakeoff : PlaneLanding;
+
+  // Fetch airports from API on mount
+  useEffect(() => {
+    if (propAirports) {
+      setAirportsData(propAirports);
+      return;
+    }
+
+    const fetchAirports = async () => {
+      setIsLoadingAirports(true);
+      try {
+        const response = await fetch('http://localhost:3001/api/airports');
+        const data = await response.json();
+        if (data.airports && data.airports.length > 0) {
+          // Transform API data to match component format
+          const formattedAirports = data.airports.map((airport, index) => ({
+            id: airport.id?.toString() || (index + 1).toString(),
+            code: airport.code,
+            name: airport.name,
+            city: airport.city,
+            country: airport.country,
+          }));
+          setAirportsData(formattedAirports);
+        }
+      } catch (err) {
+        console.error('Failed to fetch airports from API, using defaults:', err);
+        // Keep using default airports
+      } finally {
+        setIsLoadingAirports(false);
+      }
+    };
+
+    fetchAirports();
+  }, [propAirports]);
 
   // Sync internal query state when external value prop changes (e.g., swap)
   useEffect(() => {
@@ -233,19 +269,19 @@ function AirportSearchInput({
     if (!debouncedQuery) {
       // Show recent searches first, then popular airports
       const recentIds = recentSearches.map(r => r.id);
-      const popularAirports = airports.filter(a => !recentIds.includes(a.id)).slice(0, 5);
+      const popularAirports = airportsData.filter(a => !recentIds.includes(a.id)).slice(0, 5);
       setResults([...recentSearches.slice(0, 3), ...popularAirports]);
       return;
     }
 
     const normalizedQuery = debouncedQuery.toLowerCase().trim();
-    const filtered = airports.filter((airport) => {
+    const filtered = airportsData.filter((airport) => {
       const searchableText = `${airport.code} ${airport.name} ${airport.city} ${airport.country}`.toLowerCase();
       return searchableText.includes(normalizedQuery);
     });
 
     setResults(filtered.slice(0, 8));
-  }, [debouncedQuery, isFocused, airports, recentSearches]);
+  }, [debouncedQuery, isFocused, airportsData, recentSearches]);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -470,7 +506,17 @@ function AirportSearchInput({
 
                         {/* Country Code */}
                         <div className="shrink-0 text-xs font-medium text-primary">
-                          ID
+                          {airport.country === 'Indonesia' ? 'ID' : 
+                           airport.country === 'Singapore' ? 'SG' : 
+                           airport.country === 'Malaysia' ? 'MY' : 
+                           airport.country === 'Japan' ? 'JP' : 
+                           airport.country === 'Thailand' ? 'TH' : 
+                           airport.country === 'Australia' ? 'AU' : 
+                           airport.country === 'South Korea' ? 'KR' : 
+                           airport.country === 'China' ? 'CN' : 
+                           airport.country === 'Philippines' ? 'PH' : 
+                           airport.country === 'Vietnam' ? 'VN' : 
+                           airport.country?.substring(0, 2).toUpperCase() || 'ID'}
                         </div>
                       </button>
                     </motion.li>

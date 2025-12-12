@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useFlightSelection } from "../context/FlightSelectionContext";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion"; // eslint-disable-line no-unused-vars
 import { 
@@ -8,6 +10,8 @@ import {
   Filter,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Luggage,
   Utensils,
   Wifi,
@@ -369,25 +373,47 @@ function EmptyFlights() {
 
 // Search Summary Header
 function SearchSummary({ from, to, date, passengers }) {
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Semua tanggal';
+    try {
+      return new Date(dateStr).toLocaleDateString('id-ID', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-4 mb-6">
       <div className="flex flex-wrap items-center gap-4 text-sm">
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-primary" />
-          <span className="font-medium text-foreground">{from || 'Asal'}</span>
+          <span className="font-medium text-foreground">{from || 'Semua Kota'}</span>
           <ArrowRight className="w-4 h-4 text-muted-foreground" />
-          <span className="font-medium text-foreground">{to || 'Tujuan'}</span>
+          <span className="font-medium text-foreground">{to || 'Semua Tujuan'}</span>
         </div>
         <div className="w-px h-4 bg-border hidden md:block" />
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
-          <span className="text-muted-foreground">{date || 'Pilih tanggal'}</span>
+          <span className="text-muted-foreground">{formatDate(date)}</span>
         </div>
         <div className="w-px h-4 bg-border hidden md:block" />
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-primary" />
           <span className="text-muted-foreground">{passengers || 1} Penumpang</span>
         </div>
+        {(!from && !to && !date) && (
+          <>
+            <div className="w-px h-4 bg-border hidden md:block" />
+            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+              Menampilkan semua penerbangan
+            </span>
+          </>
+        )}
       </div>
     </div>
   );
@@ -395,7 +421,7 @@ function SearchSummary({ from, to, date, passengers }) {
 
 // Main Search Page
 export function SearchFlights() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showSearchCard, setShowSearchCard] = useState(false);
   const [filters, setFilters] = useState({});
   const [sortBy, setSortBy] = useState('price_asc');
@@ -403,7 +429,15 @@ export function SearchFlights() {
   const [flights, setFlights] = useState([]);
   const [airlines, setAirlines] = useState([]);
   const [error, setError] = useState(null);
-  const prevParamsRef = useRef({ from: null, to: null, departure: null });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
+  const prevParamsRef = useRef({ from: null, to: null, departure: null, page: null });
 
   // Get search params
   const from = searchParams.get('from') || '';
@@ -413,6 +447,7 @@ export function SearchFlights() {
   const children = searchParams.get('children') || '0';
   const infants = searchParams.get('infants') || '0';
   const flightClass = searchParams.get('class') || 'economy';
+  const page = parseInt(searchParams.get('page')) || 1;
   const passengers = parseInt(adults) + parseInt(children);
 
   // Fetch airlines for filter
@@ -456,6 +491,17 @@ export function SearchFlights() {
         params.append('children', children);
         params.append('infants', infants);
         params.append('flightClass', flightClass);
+        params.append('page', page.toString());
+        params.append('limit', '10');
+        
+        // Add sorting
+        if (sortBy.includes('price')) {
+          params.append('sortBy', 'base_price');
+          params.append('sortOrder', sortBy === 'price_asc' ? 'ASC' : 'DESC');
+        } else if (sortBy === 'departure_asc') {
+          params.append('sortBy', 'departure_time');
+          params.append('sortOrder', 'ASC');
+        }
 
         const response = await fetch(`http://localhost:3001/api/flights/search?${params.toString()}`);
         const data = await response.json();
@@ -463,6 +509,11 @@ export function SearchFlights() {
         if (!isMounted) return;
 
         if (data.success && data.flights) {
+          // Update pagination info
+          if (data.pagination) {
+            setPagination(data.pagination);
+          }
+          
           // Add some default promos based on conditions
           const flightsWithPromos = data.flights.map(flight => {
             const promos = [];
@@ -511,10 +562,11 @@ export function SearchFlights() {
     const paramsChanged = 
       prevParamsRef.current.from !== from ||
       prevParamsRef.current.to !== to ||
-      prevParamsRef.current.departure !== departure;
+      prevParamsRef.current.departure !== departure ||
+      prevParamsRef.current.page !== page;
     
     if (paramsChanged) {
-      prevParamsRef.current = { from, to, departure };
+      prevParamsRef.current = { from, to, departure, page };
     }
 
     fetchFlights();
@@ -522,7 +574,16 @@ export function SearchFlights() {
     return () => {
       isMounted = false;
     };
-  }, [from, to, departure, adults, children, infants, flightClass]);
+  }, [from, to, departure, adults, children, infants, flightClass, page, sortBy]);
+
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', newPage.toString());
+    setSearchParams(params);
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Filter and sort flights
   const filteredFlights = flights
@@ -546,10 +607,20 @@ export function SearchFlights() {
       }
     });
 
+  const navigate = useNavigate();
+  const { setSelectedFlight } = useFlightSelection();
+
   const handleSelectFlight = (flight) => {
-    // Navigate to booking page or show booking modal
-    console.log('Selected flight:', flight);
-    alert(`Anda memilih ${flight.airline.name} ${flight.flightNumber}\nHarga: ${formatPrice(flight.price)}`);
+    // Save selected flight to context and redirect to Passengers page
+    setSelectedFlight({
+      ...flight,
+      originCity: flight.origin?.city,
+      originCode: flight.origin?.code,
+      destinationCity: flight.destination?.city,
+      destinationCode: flight.destination?.code,
+      className: flight.className || 'Economy',
+    });
+    navigate('/account/passengers');
   };
 
   return (
@@ -604,7 +675,14 @@ export function SearchFlights() {
             {/* Results Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <p className="text-sm text-muted-foreground">
-                {isLoading ? 'Mencari penerbangan...' : `${filteredFlights.length} penerbangan ditemukan`}
+                {isLoading ? 'Mencari penerbangan...' : (
+                  <>
+                    <span className="font-medium text-foreground">{pagination.totalItems}</span> penerbangan ditemukan
+                    {pagination.totalPages > 1 && (
+                      <span> • Halaman {pagination.currentPage} dari {pagination.totalPages}</span>
+                    )}
+                  </>
+                )}
               </p>
               <SortOptions sortBy={sortBy} setSortBy={setSortBy} />
             </div>
@@ -634,6 +712,61 @@ export function SearchFlights() {
                     onSelect={handleSelectFlight}
                   />
                 ))}
+
+                {/* Pagination */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 pt-6 pb-4">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      disabled={!pagination.hasPrevPage}
+                      className="flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Prev
+                    </button>
+
+                    {/* Page Numbers */}
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (pagination.totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (pagination.currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                          pageNum = pagination.totalPages - 4 + i;
+                        } else {
+                          pageNum = pagination.currentPage - 2 + i;
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`w-10 h-10 text-sm font-medium rounded-lg transition-colors ${
+                              pageNum === pagination.currentPage
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border border-border bg-card hover:bg-muted'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      disabled={!pagination.hasNextPage}
+                      className="flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <EmptyFlights />

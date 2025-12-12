@@ -5,6 +5,7 @@ import { AnimeNavBar } from "./components/ui/anime-navbar";
 import { FooterSection } from "./components/ui/footer-section";
 import { ThemeProvider } from "./context/theme-context";
 import { AuthProvider } from "./context/auth-context";
+import { FlightSelectionProvider } from "./context/FlightSelectionContext";
 import { Home as HomeIcon, Search, Ticket, User } from "lucide-react";
 
 // Lazy load pages untuk better performance
@@ -63,7 +64,9 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="aviata-theme">
       <AuthProvider storageKey="aviata-auth">
-        <AppContent />
+        <FlightSelectionProvider>
+          <AppContent />
+        </FlightSelectionProvider>
       </AuthProvider>
     </ThemeProvider>
   );

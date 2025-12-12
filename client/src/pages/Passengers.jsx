@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FlightSummary from "../components/ui/FlightSummary";
 import { Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -231,6 +232,7 @@ export function Passengers() {
 
           {/* Main Content */}
           <div className="flex-1">
+            <FlightSummary />
             <div className="bg-card border border-border rounded-xl p-6">
               <h1 className="text-2xl font-bold text-foreground mb-2">Daftar Penumpang</h1>
               <p className="text-muted-foreground mb-6">

@@ -308,16 +308,16 @@ export function FlightSearchCard({ className }) {
           <FlightDatePicker
             label="Keberangkatan"
             placeholder="Pilih tanggal"
-            selectedDate={departureDate}
-            onDateSelect={setDepartureDate}
+            value={departureDate}
+            onChange={setDepartureDate}
           />
           
           {tripType === "round-trip" && (
             <FlightDatePicker
               label="Kepulangan"
               placeholder="Pilih tanggal"
-              selectedDate={returnDate}
-              onDateSelect={setReturnDate}
+              value={returnDate}
+              onChange={setReturnDate}
             />
           )}
           

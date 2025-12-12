@@ -164,35 +164,71 @@ app.get('/api/airlines', async (req, res) => {
   }
 });
 
-// Search flights
+// Search flights with pagination
 app.get('/api/flights/search', async (req, res) => {
   try {
-    const { from, to, departure, returnDate, adults = 1, children = 0, infants = 0, flightClass = 'economy' } = req.query;
+    const { 
+      from, 
+      to, 
+      departure, 
+      returnDate, 
+      adults = 1, 
+      children = 0, 
+      infants = 0, 
+      flightClass = 'economy',
+      page = 1,
+      limit = 10,
+      sortBy = 'departure_time',
+      sortOrder = 'ASC'
+    } = req.query;
 
-    // Build the query
-    let query = `
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const offset = (pageNum - 1) * limitNum;
+
+    // Build the base query (using only columns that exist in the table)
+    let baseQuery = `
+      FROM flights f
+      JOIN airlines a ON f.airline_id = a.id
+      JOIN airports orig ON f.origin_airport_id = orig.id
+      JOIN airports dest ON f.destination_airport_id = dest.id
+      WHERE 1=1
+    `;
+
+    const baseParams = [];
+
+    // Filter by origin airport (optional)
+    if (from) {
+      baseQuery += ` AND (orig.code = ? OR orig.city LIKE ?)`;
+      baseParams.push(from, `%${from}%`);
+    }
+
+    // Filter by destination airport (optional)
+    if (to) {
+      baseQuery += ` AND (dest.code = ? OR dest.city LIKE ?)`;
+      baseParams.push(to, `%${to}%`);
+    }
+
+    // Filter by departure date (optional)
+    if (departure) {
+      baseQuery += ` AND DATE(f.departure_time) = ?`;
+      baseParams.push(departure);
+    }
+
+    // Get total count first
+    const countQuery = `SELECT COUNT(*) as total ${baseQuery}`;
+    const [countResult] = await db.query(countQuery, baseParams);
+    const totalCount = countResult[0].total;
+    const totalPages = Math.ceil(totalCount / limitNum);
+
+    // Build the main select query (only select columns that exist)
+    let selectQuery = `
       SELECT 
         f.id,
         f.flight_number,
         f.departure_time,
         f.arrival_time,
-        f.departure_terminal,
-        f.arrival_terminal,
-        f.base_price,
-        f.available_seats,
-        f.aircraft_type,
-        f.seat_layout,
-        f.seat_pitch,
-        f.baggage_allowance,
-        f.cabin_baggage,
-        f.has_wifi,
-        f.has_entertainment,
-        f.has_power,
-        f.has_meal,
-        f.is_refundable,
-        f.is_reschedulable,
-        f.reschedule_fee,
-        f.status,
+        f.price as base_price,
         a.id as airline_id,
         a.code as airline_code,
         a.name as airline_name,
@@ -204,47 +240,25 @@ app.get('/api/flights/search', async (req, res) => {
         dest.id as destination_id,
         dest.code as destination_code,
         dest.name as destination_name,
-        dest.city as destination_city,
-        fc.name as flight_class_name,
-        fc.multiplier as class_multiplier
-      FROM flights f
-      JOIN airlines a ON f.airline_id = a.id
-      JOIN airports orig ON f.origin_airport_id = orig.id
-      JOIN airports dest ON f.destination_airport_id = dest.id
-      LEFT JOIN flight_classes fc ON fc.code = ?
-      WHERE f.status = 'scheduled'
-        AND f.available_seats >= ?
+        dest.city as destination_city
+      ${baseQuery}
     `;
 
-    const params = [flightClass, parseInt(adults) + parseInt(children)];
+    // Add sorting
+    const validSortColumns = ['departure_time', 'price', 'arrival_time'];
+    const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'departure_time';
+    const order = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    selectQuery += ` ORDER BY f.${sortColumn} ${order}`;
 
-    // Filter by origin airport
-    if (from) {
-      query += ` AND (orig.code = ? OR orig.city LIKE ?)`;
-      params.push(from, `%${from}%`);
-    }
+    // Add pagination
+    selectQuery += ` LIMIT ? OFFSET ?`;
+    const selectParams = [...baseParams, limitNum, offset];
 
-    // Filter by destination airport
-    if (to) {
-      query += ` AND (dest.code = ? OR dest.city LIKE ?)`;
-      params.push(to, `%${to}%`);
-    }
-
-    // Filter by departure date
-    if (departure) {
-      query += ` AND DATE(f.departure_time) = ?`;
-      params.push(departure);
-    }
-
-    // Order by departure time
-    query += ` ORDER BY f.departure_time ASC`;
-
-    const [rows] = await db.query(query, params);
+    const [rows] = await db.query(selectQuery, selectParams);
 
     // Transform data to match frontend format
     const flights = rows.map(row => {
-      const classMultiplier = row.class_multiplier || 1;
-      const price = Math.round(row.base_price * classMultiplier);
+      const price = row.base_price;
 
       return {
         id: row.id,
@@ -269,36 +283,43 @@ app.get('/api/flights/search', async (req, res) => {
         },
         departureTime: row.departure_time,
         arrivalTime: row.arrival_time,
-        departureTerminal: row.departure_terminal || 'TBA',
-        arrivalTerminal: row.arrival_terminal || 'TBA',
+        departureTerminal: 'Terminal 2',
+        arrivalTerminal: 'Terminal 1',
         price: price,
-        availableSeats: row.available_seats,
-        stops: 0, // Direct flights for now
-        flightClass: row.flight_class_name || 'Economy',
-        baggage: row.baggage_allowance || 0,
-        cabinBaggage: row.cabin_baggage || 7,
-        aircraft: row.aircraft_type || 'Boeing 737-800',
-        seatLayout: row.seat_layout || '3-3',
-        seatPitch: row.seat_pitch || 30,
-        hasWifi: Boolean(row.has_wifi),
-        hasEntertainment: Boolean(row.has_entertainment),
-        hasPower: Boolean(row.has_power),
-        hasMeal: Boolean(row.has_meal),
-        isRefundable: Boolean(row.is_refundable),
-        isReschedulable: Boolean(row.is_reschedulable),
-        rescheduleFee: row.reschedule_fee || 150000,
-        promos: [] // Will be populated separately if needed
+        availableSeats: 50,
+        stops: 0,
+        flightClass: 'Economy',
+        baggage: 20,
+        cabinBaggage: 7,
+        aircraft: 'Boeing 737-800',
+        seatLayout: '3-3',
+        seatPitch: 30,
+        hasWifi: true,
+        hasEntertainment: true,
+        hasPower: true,
+        hasMeal: true,
+        isRefundable: true,
+        isReschedulable: true,
+        rescheduleFee: 150000,
+        promos: []
       };
     });
 
     res.json({ 
       success: true,
       flights: flights,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: totalPages,
+        totalItems: totalCount,
+        itemsPerPage: limitNum,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1
+      },
       meta: {
-        total: flights.length,
-        from,
-        to,
-        departure,
+        from: from || 'Semua',
+        to: to || 'Semua',
+        departure: departure || 'Semua tanggal',
         passengers: parseInt(adults) + parseInt(children) + parseInt(infants)
       }
     });
