@@ -62,7 +62,7 @@ const Home = () => {
           </div>
 
           {/* Flight Search Card */}
-          <FlightSearchCard className="max-w-4xl mx-auto" />
+          <FlightSearchCard className="w-full max-w-none mx-auto" />
         </div>
       </section>
 
