@@ -223,7 +223,7 @@ export function Passengers() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
+    <div className="min-h-screen bg-muted/30 pt-24 pb-8">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar */}
