@@ -1,0 +1,263 @@
+import { useState } from "react";
+import { Navigate, Link } from "react-router-dom";
+import { 
+  Ticket,
+  SlidersHorizontal,
+  Calendar,
+  ChevronDown,
+  X
+} from "lucide-react";
+import { cn } from "../lib/utils";
+import { useAuth } from "../context/auth-context";
+import { AccountSidebar } from "../components/ui/account-sidebar";
+
+// Date Filter Buttons
+function DateFilterButtons({ activeFilter, setActiveFilter }) {
+  const currentDate = new Date();
+  const currentMonthLabel = currentDate.toLocaleString('id-ID', { month: 'short', year: 'numeric' });
+  const prevMonthLabel = new Date(new Date().setMonth(new Date().getMonth() - 1))
+    .toLocaleString('id-ID', { month: 'short', year: 'numeric' });
+
+  const filters = [
+    { id: "90days", label: "Past 90 Days" },
+    { id: "current", label: currentMonthLabel },
+    { id: "prev", label: prevMonthLabel },
+    { id: "custom", label: "Customize date" },
+  ];
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {filters.map((filter) => (
+        <button
+          key={filter.id}
+          onClick={() => setActiveFilter(filter.id)}
+          className={cn(
+            "px-4 py-2 rounded-full text-sm font-medium transition-all",
+            activeFilter === filter.id
+              ? "bg-primary text-primary-foreground"
+              : "bg-background border border-border text-foreground hover:bg-muted"
+          )}
+        >
+          {filter.label}
+        </button>
+      ))}
+      
+      {/* Filter Button */}
+      <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-border text-sm font-medium hover:bg-muted transition-colors">
+        <SlidersHorizontal className="w-4 h-4" />
+        Filter
+      </button>
+    </div>
+  );
+}
+
+// Custom Date Picker Modal
+function CustomDateModal({ isOpen, onClose, onApply }) {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative bg-card rounded-xl p-6 w-full max-w-sm mx-4 shadow-xl"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-foreground">Pilih Rentang Tanggal</h3>
+          <button onClick={onClose}>
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1">Dari</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1">Sampai</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+            />
+          </div>
+          <button
+            onClick={() => {
+              onApply(startDate, endDate);
+              onClose();
+            }}
+            className="w-full py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+          >
+            Terapkan
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// Cash Register / Sleeping Illustration
+function EmptyIllustration() {
+  return (
+    <div className="relative w-32 h-32">
+      {/* Background receipt/document */}
+      <div className="absolute inset-0 bg-muted/50 rounded-lg" />
+      
+      {/* Cash register */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-16 bg-gradient-to-b from-gray-300 to-gray-400 rounded-lg shadow-md">
+        {/* Screen */}
+        <div className="absolute top-1 left-1/2 -translate-x-1/2 w-16 h-6 bg-gray-200 rounded-sm" />
+        {/* Buttons */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="w-2 h-2 rounded-full bg-gray-500" />
+          <div className="w-2 h-2 rounded-full bg-gray-500" />
+          <div className="w-2 h-2 rounded-full bg-gray-500" />
+        </div>
+      </div>
+      
+      {/* Sleeping Zzz */}
+      <div className="absolute -top-2 right-2 text-2xl animate-bounce">
+        <span className="bg-amber-400 text-white text-xs font-bold px-2 py-1 rounded-full">zzz</span>
+      </div>
+    </div>
+  );
+}
+
+// Empty State Component
+function EmptyPurchases() {
+  return (
+    <div className="flex items-start gap-6 py-8">
+      <EmptyIllustration />
+      <div>
+        <h3 className="text-lg font-bold text-foreground mb-2">No Purchases Found</h3>
+        <p className="text-sm text-muted-foreground mb-4 max-w-md">
+          You haven&apos;t made any purchases within the past 30 days. If you have made any purchases previously, use Filter to see them.
+        </p>
+        <Link 
+          to="/"
+          className="text-sm text-primary hover:underline font-medium"
+        >
+          Make a New Purchase
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// Purchase Item Card (for when there are purchases)
+function PurchaseCard({ purchase }) {
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-border last:border-b-0">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Ticket className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h4 className="font-medium text-foreground">{purchase.title}</h4>
+          <p className="text-sm text-muted-foreground">{purchase.date}</p>
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="font-semibold text-foreground">Rp {purchase.amount.toLocaleString('id-ID')}</p>
+        <span className={cn(
+          "text-xs px-2 py-0.5 rounded-full",
+          purchase.status === "success" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+          purchase.status === "pending" && "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+          purchase.status === "failed" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+        )}>
+          {purchase.status === "success" ? "Berhasil" : purchase.status === "pending" ? "Pending" : "Gagal"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Main Purchase List Page
+export function PurchaseList() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [activeFilter, setActiveFilter] = useState("90days");
+  const [showCustomDate, setShowCustomDate] = useState(false);
+
+  // Redirect if not authenticated
+  if (!isLoading && !isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Mock purchases data - empty for now
+  const purchases = [];
+
+  const handleFilterChange = (filterId) => {
+    if (filterId === "custom") {
+      setShowCustomDate(true);
+    } else {
+      setActiveFilter(filterId);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-muted/30 py-8">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Sidebar */}
+          <AccountSidebar />
+
+          {/* Main Content */}
+          <div className="flex-1 space-y-6">
+            {/* Header with link to My Booking */}
+            <div className="flex items-center gap-3 text-sm">
+              <Ticket className="w-5 h-5 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                Find all your e-tickets and vouchers on{" "}
+                <Link to="/account/orders" className="text-primary hover:underline font-medium">
+                  My Booking
+                </Link>
+              </span>
+            </div>
+
+            {/* Date Filters */}
+            <DateFilterButtons 
+              activeFilter={activeFilter} 
+              setActiveFilter={handleFilterChange} 
+            />
+
+            {/* Purchases List */}
+            <div className="bg-card border border-border rounded-xl p-6">
+              {purchases.length > 0 ? (
+                <div>
+                  {purchases.map((purchase) => (
+                    <PurchaseCard key={purchase.id} purchase={purchase} />
+                  ))}
+                </div>
+              ) : (
+                <EmptyPurchases />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Custom Date Modal */}
+      <CustomDateModal
+        isOpen={showCustomDate}
+        onClose={() => setShowCustomDate(false)}
+        onApply={(start, end) => {
+          console.log("Custom date range:", start, end);
+          setActiveFilter("custom");
+        }}
+      />
+    </div>
+  );
+}
+
+export default PurchaseList;

@@ -4,10 +4,7 @@ import {
   CreditCard, 
   ClipboardList, 
   Receipt, 
-  RotateCcw, 
-  Bell, 
   Users, 
-  Mail, 
   Settings, 
   LogOut,
   ChevronRight
@@ -19,30 +16,27 @@ const menuItems = [
   { 
     section: "main",
     items: [
-      { name: "Poin Saya", url: "/account/points", icon: Award, badge: "0" },
-      { name: "Kartu Saya", url: "/account/cards", icon: CreditCard },
+      { name: "0", url: "/account/points", icon: Award, isPoints: true },
+      { name: "My Cards", url: "/account/cards", icon: CreditCard },
     ]
   },
   {
     section: "orders",
     items: [
-      { name: "Pesanan Saya", url: "/account/orders", icon: ClipboardList },
-      { name: "Daftar Pembelian", url: "/account/purchases", icon: Receipt },
-      { name: "Refunds", url: "/account/refunds", icon: RotateCcw },
+      { name: "My Booking", url: "/account/orders", icon: ClipboardList },
+      { name: "Purchase List", url: "/account/purchases", icon: Receipt },
     ]
   },
   {
     section: "settings",
     items: [
-      { name: "Notifikasi Harga", url: "/account/price-alerts", icon: Bell },
-      { name: "Detail Penumpang", url: "/account/passengers", icon: Users },
-      { name: "Pengaturan Notifikasi", url: "/account/notifications", icon: Mail },
+      { name: "Saved Passenger Details", url: "/account/passengers", icon: Users },
     ]
   },
   {
     section: "account",
     items: [
-      { name: "Akun Saya", url: "/account/settings", icon: Settings },
+      { name: "My Account", url: "/account/settings", icon: Settings },
     ]
   }
 ];
@@ -85,7 +79,7 @@ export function AccountSidebar({ className }) {
         <button className="mt-4 w-full flex items-center justify-between px-4 py-2.5 bg-primary rounded-lg text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4" />
-            <span>Kamu adalah <strong>Bronze Priority</strong></span>
+            <span>You&apos;re our <strong>Bronze Priority</strong></span>
           </div>
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -110,9 +104,6 @@ export function AccountSidebar({ className }) {
               >
                 <item.icon className="w-5 h-5" />
                 <span className="flex-1">{item.name}</span>
-                {item.badge && (
-                  <span className="text-xs text-muted-foreground">{item.badge}</span>
-                )}
               </NavLink>
             ))}
           </div>
