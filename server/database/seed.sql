@@ -40,41 +40,48 @@ INSERT INTO flight_classes (name, code, multiplier) VALUES
 ON DUPLICATE KEY UPDATE name=name;
 
 -- Seed Flights (Future dates from Dec 2025)
-INSERT INTO flights (airline_id, flight_number, origin_airport_id, destination_airport_id, departure_time, arrival_time, base_price, available_seats) VALUES
+-- Format: airline_id, flight_number, origin, dest, departure, arrival, terminal_dep, terminal_arr, price, seats, aircraft, seat_layout, seat_pitch, baggage, cabin_baggage, wifi, entertainment, power, meal, refundable, reschedulable, reschedule_fee
+INSERT INTO flights (
+  airline_id, flight_number, origin_airport_id, destination_airport_id, 
+  departure_time, arrival_time, departure_terminal, arrival_terminal,
+  base_price, available_seats, aircraft_type, seat_layout, seat_pitch,
+  baggage_allowance, cabin_baggage, has_wifi, has_entertainment, has_power, has_meal,
+  is_refundable, is_reschedulable, reschedule_fee
+) VALUES
 -- Jakarta (CGK) -> Bali (DPS)
-(1, 'GA402', 1, 2, '2025-12-15 08:00:00', '2025-12-15 10:50:00', 1500000, 150),
-(3, 'QZ7510', 1, 2, '2025-12-15 09:30:00', '2025-12-15 12:20:00', 850000, 180),
-(4, 'JT32', 1, 2, '2025-12-15 14:00:00', '2025-12-15 16:50:00', 900000, 180),
-(6, 'ID6502', 1, 2, '2025-12-15 16:30:00', '2025-12-15 19:20:00', 1200000, 150),
-(7, 'QG802', 1, 2, '2025-12-15 18:00:00', '2025-12-15 20:50:00', 750000, 180),
+(1, 'GA402', 1, 2, '2025-12-15 08:00:00', '2025-12-15 10:50:00', '3', 'D', 1500000, 150, 'Boeing 737-800', '3-3', 31, 20, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 350000),
+(3, 'QZ7510', 1, 2, '2025-12-15 09:30:00', '2025-12-15 12:20:00', '2F', 'D', 850000, 180, 'Airbus A320', '3-3', 28, 0, 7, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, 150000),
+(4, 'JT32', 1, 2, '2025-12-15 14:00:00', '2025-12-15 16:50:00', '1A', 'D', 900000, 180, 'Boeing 737-900ER', '3-3', 29, 0, 7, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, 150000),
+(6, 'ID6502', 1, 2, '2025-12-15 16:30:00', '2025-12-15 19:20:00', '2D', 'D', 1200000, 150, 'Airbus A320', '3-3', 30, 20, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 250000),
+(7, 'QG802', 1, 2, '2025-12-15 18:00:00', '2025-12-15 20:50:00', '2D', 'D', 750000, 180, 'Airbus A320', '3-3', 28, 0, 7, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, 100000),
 
 -- Jakarta (CGK) -> Singapore (SIN)
-(1, 'GA836', 1, 3, '2025-12-16 08:30:00', '2025-12-16 11:15:00', 2500000, 150),
-(2, 'SQ950', 1, 3, '2025-12-16 06:15:00', '2025-12-16 09:00:00', 3200000, 200),
-(3, 'QZ262', 1, 3, '2025-12-16 13:00:00', '2025-12-16 15:45:00', 1200000, 180),
+(1, 'GA836', 1, 3, '2025-12-16 08:30:00', '2025-12-16 11:15:00', '3', '3', 2500000, 150, 'Airbus A330-300', '2-4-2', 32, 30, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 500000),
+(2, 'SQ950', 1, 3, '2025-12-16 06:15:00', '2025-12-16 09:00:00', '3', '2', 3200000, 200, 'Boeing 787-10', '3-3-3', 32, 30, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 800000),
+(3, 'QZ262', 1, 3, '2025-12-16 13:00:00', '2025-12-16 15:45:00', '2F', '4', 1200000, 180, 'Airbus A320', '3-3', 28, 0, 7, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, 200000),
 
 -- Jakarta (CGK) -> Surabaya (SUB)
-(1, 'GA310', 1, 7, '2025-12-17 07:00:00', '2025-12-17 08:30:00', 800000, 150),
-(4, 'JT570', 1, 7, '2025-12-17 10:00:00', '2025-12-17 11:30:00', 650000, 180),
-(7, 'QG410', 1, 7, '2025-12-17 14:00:00', '2025-12-17 15:30:00', 550000, 180),
+(1, 'GA310', 1, 7, '2025-12-17 07:00:00', '2025-12-17 08:30:00', '3', '1', 800000, 150, 'Boeing 737-800', '3-3', 31, 20, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 200000),
+(4, 'JT570', 1, 7, '2025-12-17 10:00:00', '2025-12-17 11:30:00', '1A', '1', 650000, 180, 'Boeing 737-900ER', '3-3', 29, 0, 7, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, 100000),
+(7, 'QG410', 1, 7, '2025-12-17 14:00:00', '2025-12-17 15:30:00', '2D', '1', 550000, 180, 'Airbus A320', '3-3', 28, 0, 7, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, 75000),
 
 -- Jakarta (CGK) -> Yogyakarta (JOG)
-(1, 'GA206', 1, 10, '2025-12-18 06:30:00', '2025-12-18 07:45:00', 900000, 150),
-(6, 'ID6370', 1, 10, '2025-12-18 12:00:00', '2025-12-18 13:15:00', 750000, 150),
+(1, 'GA206', 1, 10, '2025-12-18 06:30:00', '2025-12-18 07:45:00', '3', '1', 900000, 150, 'Boeing 737-800', '3-3', 31, 20, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 200000),
+(6, 'ID6370', 1, 10, '2025-12-18 12:00:00', '2025-12-18 13:15:00', '2D', '1', 750000, 150, 'Airbus A320', '3-3', 30, 20, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 150000),
 
 -- Surabaya (SUB) -> Kuala Lumpur (KUL)
-(3, 'AK363', 7, 4, '2025-12-19 10:00:00', '2025-12-19 13:35:00', 1100000, 180),
+(8, 'AK363', 7, 4, '2025-12-19 10:00:00', '2025-12-19 13:35:00', '1', '2', 1100000, 180, 'Airbus A320', '3-3', 28, 0, 7, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, 180000),
 
 -- Jakarta (CGK) -> Tokyo (NRT/HND)
-(5, 'JL726', 1, 5, '2025-12-20 21:25:00', '2025-12-21 06:35:00', 8500000, 200),
-(1, 'GA874', 1, 6, '2025-12-20 23:15:00', '2025-12-21 08:50:00', 9200000, 150),
+(5, 'JL726', 1, 5, '2025-12-20 21:25:00', '2025-12-21 06:35:00', '2', '2', 8500000, 200, 'Boeing 787-8', '3-3-3', 34, 30, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 1500000),
+(1, 'GA874', 1, 6, '2025-12-20 23:15:00', '2025-12-21 08:50:00', '3', '3', 9200000, 150, 'Airbus A330-300', '2-4-2', 32, 30, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 1800000),
 
 -- Jakarta (CGK) -> Bangkok (BKK)
-(1, 'GA864', 1, 11, '2025-12-22 09:00:00', '2025-12-22 12:30:00', 3500000, 150),
-(3, 'QZ8450', 1, 11, '2025-12-22 14:00:00', '2025-12-22 17:30:00', 1800000, 180),
+(1, 'GA864', 1, 11, '2025-12-22 09:00:00', '2025-12-22 12:30:00', '3', '1', 3500000, 150, 'Airbus A330-300', '2-4-2', 32, 30, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 700000),
+(3, 'QZ8450', 1, 11, '2025-12-22 14:00:00', '2025-12-22 17:30:00', '2F', '1', 1800000, 180, 'Airbus A320', '3-3', 28, 0, 7, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, 300000),
 
 -- Jakarta (CGK) -> Hong Kong (HKG)
-(1, 'GA878', 1, 12, '2025-12-23 08:00:00', '2025-12-23 13:30:00', 4500000, 150);
+(1, 'GA878', 1, 12, '2025-12-23 08:00:00', '2025-12-23 13:30:00', '3', '1', 4500000, 150, 'Airbus A330-300', '2-4-2', 32, 30, 7, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 900000);
 
 -- Seed Sample Users
 INSERT INTO users (email, password, full_name, gender, birth_date, city, priority_level, points) VALUES

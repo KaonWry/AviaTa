@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { FlightSearchCard } from "../components/ui/flight-search-card";
 import { FlightResultCard } from "../components/ui/flight-result-card";
+import { PremiumCheckbox } from "../components/ui/premium-checkbox";
 
 // Format price to IDR
 function formatPrice(price) {
@@ -121,29 +122,30 @@ function FilterSidebar({ filters, setFilters, airlines }) {
           {expandedSections.time ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
         {expandedSections.time && (
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-3">
             {[
               { id: 'morning', label: 'Pagi (06:00 - 12:00)', range: [6, 12] },
               { id: 'afternoon', label: 'Siang (12:00 - 18:00)', range: [12, 18] },
               { id: 'evening', label: 'Malam (18:00 - 00:00)', range: [18, 24] },
             ].map((time) => (
-              <label key={time.id} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={filters.departureTime?.includes(time.id) || false}
-                  onChange={(e) => {
-                    const current = filters.departureTime || [];
-                    setFilters({
-                      ...filters,
-                      departureTime: e.target.checked 
-                        ? [...current, time.id]
-                        : current.filter(t => t !== time.id)
-                    });
-                  }}
-                  className="rounded border-border accent-primary"
-                />
-                <span className="text-muted-foreground">{time.label}</span>
-              </label>
+              <PremiumCheckbox
+                key={time.id}
+                id={`time-${time.id}`}
+                label={time.label}
+                checked={filters.departureTime?.includes(time.id) || false}
+                onChange={() => {
+                  const current = filters.departureTime || [];
+                  const isChecked = current.includes(time.id);
+                  setFilters({
+                    ...filters,
+                    departureTime: isChecked 
+                      ? current.filter(t => t !== time.id)
+                      : [...current, time.id]
+                  });
+                }}
+                size="sm"
+                variant="compact"
+              />
             ))}
           </div>
         )}
@@ -159,25 +161,26 @@ function FilterSidebar({ filters, setFilters, airlines }) {
           {expandedSections.airlines ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
         {expandedSections.airlines && (
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-3">
             {airlines.map((airline) => (
-              <label key={airline.code} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={filters.airlines?.includes(airline.code) || false}
-                  onChange={(e) => {
-                    const current = filters.airlines || [];
-                    setFilters({
-                      ...filters,
-                      airlines: e.target.checked 
-                        ? [...current, airline.code]
-                        : current.filter(a => a !== airline.code)
-                    });
-                  }}
-                  className="rounded border-border accent-primary"
-                />
-                <span className="text-muted-foreground">{airline.name}</span>
-              </label>
+              <PremiumCheckbox
+                key={airline.code}
+                id={`airline-${airline.code}`}
+                label={airline.name}
+                checked={filters.airlines?.includes(airline.code) || false}
+                onChange={() => {
+                  const current = filters.airlines || [];
+                  const isChecked = current.includes(airline.code);
+                  setFilters({
+                    ...filters,
+                    airlines: isChecked 
+                      ? current.filter(a => a !== airline.code)
+                      : [...current, airline.code]
+                  });
+                }}
+                size="sm"
+                variant="compact"
+              />
             ))}
           </div>
         )}
@@ -185,15 +188,14 @@ function FilterSidebar({ filters, setFilters, airlines }) {
 
       {/* Direct Only */}
       <div className="border-t border-border pt-4">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={filters.directOnly || false}
-            onChange={(e) => setFilters({ ...filters, directOnly: e.target.checked })}
-            className="rounded border-border accent-primary"
-          />
-          <span className="text-foreground font-medium">Hanya Penerbangan Langsung</span>
-        </label>
+        <PremiumCheckbox
+          id="direct-only"
+          label="Hanya Penerbangan Langsung"
+          description="Tampilkan penerbangan tanpa transit"
+          checked={filters.directOnly || false}
+          onChange={() => setFilters({ ...filters, directOnly: !filters.directOnly })}
+          size="sm"
+        />
       </div>
     </div>
   );
@@ -399,29 +401,113 @@ export function SearchFlights() {
   const [sortBy, setSortBy] = useState('price_asc');
   const [isLoading, setIsLoading] = useState(true);
   const [flights, setFlights] = useState([]);
+  const [airlines, setAirlines] = useState([]);
+  const [error, setError] = useState(null);
   const prevParamsRef = useRef({ from: null, to: null, departure: null });
 
   // Get search params
   const from = searchParams.get('from') || '';
   const to = searchParams.get('to') || '';
   const departure = searchParams.get('departure') || '';
-  const passengers = parseInt(searchParams.get('adults') || '1') + 
-                     parseInt(searchParams.get('children') || '0');
+  const adults = searchParams.get('adults') || '1';
+  const children = searchParams.get('children') || '0';
+  const infants = searchParams.get('infants') || '0';
+  const flightClass = searchParams.get('class') || 'economy';
+  const passengers = parseInt(adults) + parseInt(children);
 
-  // Mock airlines for filter
-  const airlines = [
-    { code: 'GA', name: 'Garuda Indonesia' },
-    { code: 'SQ', name: 'Singapore Airlines' },
-    { code: 'AK', name: 'AirAsia' },
-    { code: 'JT', name: 'Lion Air' },
-    { code: 'QG', name: 'Citilink' },
-  ];
+  // Fetch airlines for filter
+  useEffect(() => {
+    const fetchAirlines = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/airlines');
+        const data = await response.json();
+        if (data.airlines) {
+          setAirlines(data.airlines.map(a => ({ code: a.code, name: a.name })));
+        }
+      } catch (err) {
+        console.error('Failed to fetch airlines:', err);
+        // Fallback airlines
+        setAirlines([
+          { code: 'GA', name: 'Garuda Indonesia' },
+          { code: 'SQ', name: 'Singapore Airlines' },
+          { code: 'QZ', name: 'AirAsia Indonesia' },
+          { code: 'JT', name: 'Lion Air' },
+          { code: 'QG', name: 'Citilink' },
+        ]);
+      }
+    };
+    fetchAirlines();
+  }, []);
 
-  // Mock flight data - In production, this would come from API
+  // Fetch flights from API
   useEffect(() => {
     let isMounted = true;
     
-    // Check if params actually changed to avoid unnecessary re-fetches
+    const fetchFlights = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const params = new URLSearchParams();
+        if (from) params.append('from', from);
+        if (to) params.append('to', to);
+        if (departure) params.append('departure', departure);
+        params.append('adults', adults);
+        params.append('children', children);
+        params.append('infants', infants);
+        params.append('flightClass', flightClass);
+
+        const response = await fetch(`http://localhost:3001/api/flights/search?${params.toString()}`);
+        const data = await response.json();
+
+        if (!isMounted) return;
+
+        if (data.success && data.flights) {
+          // Add some default promos based on conditions
+          const flightsWithPromos = data.flights.map(flight => {
+            const promos = [];
+            
+            // Add 12.12 promo for December flights
+            const depDate = new Date(flight.departureTime);
+            if (depDate.getMonth() === 11) { // December
+              promos.push({
+                title: '12.12 Super Sale',
+                shortTitle: '12.12 Sale',
+                description: 'Unlock Exclusive Deals only on 12.12 Super Sale'
+              });
+            }
+
+            // Add first flight promo
+            if (flight.isRefundable) {
+              promos.push({
+                title: 'First Flight Discount',
+                shortTitle: 'First Flight',
+                description: 'Use code FLYAVIATA to get up to Rp 250.000 off',
+                code: 'FLYAVIATA'
+              });
+            }
+
+            return { ...flight, promos };
+          });
+
+          setFlights(flightsWithPromos);
+        } else {
+          setFlights([]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch flights:', err);
+        if (isMounted) {
+          setError('Gagal memuat data penerbangan. Pastikan server berjalan.');
+          setFlights([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    // Check if params changed
     const paramsChanged = 
       prevParamsRef.current.from !== from ||
       prevParamsRef.current.to !== to ||
@@ -430,188 +516,13 @@ export function SearchFlights() {
     if (paramsChanged) {
       prevParamsRef.current = { from, to, departure };
     }
-    
-    // Simulate API call
-    const timer = setTimeout(() => {
-      if (!isMounted) return;
-      const mockFlights = [
-        {
-          id: 1,
-          flightNumber: 'GA402',
-          airline: { code: 'GA', name: 'Garuda Indonesia', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
-          destination: { code: 'DPS', name: 'Ngurah Rai International Airport', city: 'Bali' },
-          departureTime: '2025-12-24T08:00:00',
-          arrivalTime: '2025-12-24T10:50:00',
-          departureTerminal: '3',
-          arrivalTerminal: 'D',
-          price: 1500000,
-          stops: 0,
-          flightClass: 'Economy',
-          baggage: 20,
-          aircraft: 'Boeing 737-800',
-          seatLayout: '3-3',
-          seatPitch: '31',
-          hasWifi: true,
-          hasEntertainment: true,
-          hasPower: true,
-          hasMeal: true,
-          isRefundable: true,
-          isReschedulable: true,
-          rescheduleFee: 350000,
-          promos: [
-            { title: '12.12 Super Sale', shortTitle: '12.12 Sale', description: 'Unlock Exclusive Deals only on 12.12 Super Sale' },
-            { title: 'First Flight Discount', shortTitle: 'First Flight', description: 'Use code FLYAVIATA to get up to Rp 250.000 off', code: 'FLYAVIATA' }
-          ]
-        },
-        {
-          id: 2,
-          flightNumber: 'JT32',
-          airline: { code: 'JT', name: 'Lion Air', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
-          destination: { code: 'DPS', name: 'Ngurah Rai International Airport', city: 'Bali' },
-          departureTime: '2025-12-24T09:30:00',
-          arrivalTime: '2025-12-24T12:20:00',
-          departureTerminal: '1A',
-          arrivalTerminal: 'D',
-          price: 850000,
-          stops: 0,
-          flightClass: 'Economy',
-          baggage: 0,
-          aircraft: 'Boeing 737-900ER',
-          seatLayout: '3-3',
-          seatPitch: '29',
-          hasWifi: false,
-          hasEntertainment: false,
-          hasPower: false,
-          hasMeal: false,
-          isRefundable: false,
-          isReschedulable: true,
-          rescheduleFee: 150000,
-          promos: []
-        },
-        {
-          id: 3,
-          flightNumber: 'QG802',
-          airline: { code: 'QG', name: 'Citilink', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
-          destination: { code: 'DPS', name: 'Ngurah Rai International Airport', city: 'Bali' },
-          departureTime: '2025-12-24T14:00:00',
-          arrivalTime: '2025-12-24T16:50:00',
-          departureTerminal: '2D',
-          arrivalTerminal: 'D',
-          price: 750000,
-          stops: 0,
-          flightClass: 'Economy',
-          baggage: 0,
-          aircraft: 'Airbus A320',
-          seatLayout: '3-3',
-          seatPitch: '28',
-          hasWifi: false,
-          hasEntertainment: false,
-          hasPower: false,
-          hasMeal: false,
-          isRefundable: false,
-          isReschedulable: true,
-          rescheduleFee: 100000,
-          promos: [
-            { title: 'Weekend Deal', shortTitle: 'Weekend Deal', description: 'Get extra 10% off for weekend flights' }
-          ]
-        },
-        {
-          id: 4,
-          flightNumber: 'GA836',
-          airline: { code: 'GA', name: 'Garuda Indonesia', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
-          destination: { code: 'SIN', name: 'Changi International Airport', city: 'Singapore' },
-          departureTime: '2025-12-24T06:15:00',
-          arrivalTime: '2025-12-24T09:00:00',
-          departureTerminal: '3',
-          arrivalTerminal: '3',
-          price: 2500000,
-          stops: 0,
-          flightClass: 'Economy',
-          baggage: 30,
-          aircraft: 'Airbus A330-300',
-          seatLayout: '2-4-2',
-          seatPitch: '32',
-          hasWifi: true,
-          hasEntertainment: true,
-          hasPower: true,
-          hasMeal: true,
-          isRefundable: true,
-          isReschedulable: true,
-          rescheduleFee: 500000,
-          promos: [
-            { title: 'International Route Promo', shortTitle: 'Intl Promo', description: 'Special price for international routes', code: 'GOFLYINT' }
-          ]
-        },
-        {
-          id: 5,
-          flightNumber: 'QZ260',
-          airline: { code: 'QZ', name: 'AirAsia Indonesia', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
-          destination: { code: 'SIN', name: 'Changi International Airport', city: 'Singapore' },
-          departureTime: '2025-12-24T16:30:00',
-          arrivalTime: '2025-12-24T19:20:00',
-          departureTerminal: '2F',
-          arrivalTerminal: '4',
-          price: 2400800,
-          stops: 0,
-          flightClass: 'Economy',
-          baggage: 0,
-          aircraft: 'Airbus A320-100/200',
-          seatLayout: '3-3',
-          seatPitch: '28',
-          hasWifi: true,
-          hasEntertainment: false,
-          hasPower: false,
-          hasMeal: false,
-          isRefundable: false,
-          isReschedulable: true,
-          rescheduleFee: 773099,
-          promos: [
-            { title: '12.12 Super Sale', shortTitle: '12.12 Sale', description: 'Unlock Exclusive Deals only on 12.12 Super Sale' },
-            { title: 'Code FLYOVERSEANOW for your first flight!', shortTitle: 'First Flight', description: 'Booking your first flight? Use the code to get up to Rp 250.000 off', code: 'FLYOVERSEANOW' }
-          ]
-        },
-        {
-          id: 6,
-          flightNumber: 'SQ951',
-          airline: { code: 'SQ', name: 'Singapore Airlines', logo: null },
-          origin: { code: 'CGK', name: 'Soekarno-Hatta International Airport', city: 'Jakarta' },
-          destination: { code: 'SIN', name: 'Changi International Airport', city: 'Singapore' },
-          departureTime: '2025-12-24T10:30:00',
-          arrivalTime: '2025-12-24T13:15:00',
-          departureTerminal: '3',
-          arrivalTerminal: '2',
-          price: 3200000,
-          stops: 0,
-          flightClass: 'Economy',
-          baggage: 30,
-          aircraft: 'Boeing 787-10',
-          seatLayout: '3-3-3',
-          seatPitch: '32',
-          hasWifi: true,
-          hasEntertainment: true,
-          hasPower: true,
-          hasMeal: true,
-          isRefundable: true,
-          isReschedulable: true,
-          rescheduleFee: 800000,
-          promos: []
-        },
-      ];
 
-      setFlights(mockFlights);
-      setIsLoading(false);
-    }, 1000);
+    fetchFlights();
     
     return () => {
       isMounted = false;
-      clearTimeout(timer);
     };
-  }, [from, to, departure]);
+  }, [from, to, departure, adults, children, infants, flightClass]);
 
   // Filter and sort flights
   const filteredFlights = flights
@@ -644,6 +555,13 @@ export function SearchFlights() {
   return (
     <div className="min-h-screen bg-muted/30 pt-24 pb-8">
       <div className="container mx-auto px-4">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl text-red-700 dark:text-red-400">
+            {error}
+          </div>
+        )}
+
         {/* Search Summary */}
         <SearchSummary from={from} to={to} date={departure} passengers={passengers} />
 

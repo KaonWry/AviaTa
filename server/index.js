@@ -134,6 +134,292 @@ app.get('/api/country-destinations/:country', (req, res) => {
   res.json({ destinations: items });
 });
 
+// =============================================
+// Flight Search API Endpoints
+// =============================================
+
+// Get all airports for autocomplete
+app.get('/api/airports', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT id, code, name, city, country FROM airports ORDER BY city ASC'
+    );
+    res.json({ airports: rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch airports', details: error.message });
+  }
+});
+
+// Get all airlines
+app.get('/api/airlines', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT id, code, name, logo_url FROM airlines ORDER BY name ASC'
+    );
+    res.json({ airlines: rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch airlines', details: error.message });
+  }
+});
+
+// Search flights
+app.get('/api/flights/search', async (req, res) => {
+  try {
+    const { from, to, departure, returnDate, adults = 1, children = 0, infants = 0, flightClass = 'economy' } = req.query;
+
+    // Build the query
+    let query = `
+      SELECT 
+        f.id,
+        f.flight_number,
+        f.departure_time,
+        f.arrival_time,
+        f.departure_terminal,
+        f.arrival_terminal,
+        f.base_price,
+        f.available_seats,
+        f.aircraft_type,
+        f.seat_layout,
+        f.seat_pitch,
+        f.baggage_allowance,
+        f.cabin_baggage,
+        f.has_wifi,
+        f.has_entertainment,
+        f.has_power,
+        f.has_meal,
+        f.is_refundable,
+        f.is_reschedulable,
+        f.reschedule_fee,
+        f.status,
+        a.id as airline_id,
+        a.code as airline_code,
+        a.name as airline_name,
+        a.logo_url as airline_logo,
+        orig.id as origin_id,
+        orig.code as origin_code,
+        orig.name as origin_name,
+        orig.city as origin_city,
+        dest.id as destination_id,
+        dest.code as destination_code,
+        dest.name as destination_name,
+        dest.city as destination_city,
+        fc.name as flight_class_name,
+        fc.multiplier as class_multiplier
+      FROM flights f
+      JOIN airlines a ON f.airline_id = a.id
+      JOIN airports orig ON f.origin_airport_id = orig.id
+      JOIN airports dest ON f.destination_airport_id = dest.id
+      LEFT JOIN flight_classes fc ON fc.code = ?
+      WHERE f.status = 'scheduled'
+        AND f.available_seats >= ?
+    `;
+
+    const params = [flightClass, parseInt(adults) + parseInt(children)];
+
+    // Filter by origin airport
+    if (from) {
+      query += ` AND (orig.code = ? OR orig.city LIKE ?)`;
+      params.push(from, `%${from}%`);
+    }
+
+    // Filter by destination airport
+    if (to) {
+      query += ` AND (dest.code = ? OR dest.city LIKE ?)`;
+      params.push(to, `%${to}%`);
+    }
+
+    // Filter by departure date
+    if (departure) {
+      query += ` AND DATE(f.departure_time) = ?`;
+      params.push(departure);
+    }
+
+    // Order by departure time
+    query += ` ORDER BY f.departure_time ASC`;
+
+    const [rows] = await db.query(query, params);
+
+    // Transform data to match frontend format
+    const flights = rows.map(row => {
+      const classMultiplier = row.class_multiplier || 1;
+      const price = Math.round(row.base_price * classMultiplier);
+
+      return {
+        id: row.id,
+        flightNumber: row.flight_number,
+        airline: {
+          id: row.airline_id,
+          code: row.airline_code,
+          name: row.airline_name,
+          logo: row.airline_logo
+        },
+        origin: {
+          id: row.origin_id,
+          code: row.origin_code,
+          name: row.origin_name,
+          city: row.origin_city
+        },
+        destination: {
+          id: row.destination_id,
+          code: row.destination_code,
+          name: row.destination_name,
+          city: row.destination_city
+        },
+        departureTime: row.departure_time,
+        arrivalTime: row.arrival_time,
+        departureTerminal: row.departure_terminal || 'TBA',
+        arrivalTerminal: row.arrival_terminal || 'TBA',
+        price: price,
+        availableSeats: row.available_seats,
+        stops: 0, // Direct flights for now
+        flightClass: row.flight_class_name || 'Economy',
+        baggage: row.baggage_allowance || 0,
+        cabinBaggage: row.cabin_baggage || 7,
+        aircraft: row.aircraft_type || 'Boeing 737-800',
+        seatLayout: row.seat_layout || '3-3',
+        seatPitch: row.seat_pitch || 30,
+        hasWifi: Boolean(row.has_wifi),
+        hasEntertainment: Boolean(row.has_entertainment),
+        hasPower: Boolean(row.has_power),
+        hasMeal: Boolean(row.has_meal),
+        isRefundable: Boolean(row.is_refundable),
+        isReschedulable: Boolean(row.is_reschedulable),
+        rescheduleFee: row.reschedule_fee || 150000,
+        promos: [] // Will be populated separately if needed
+      };
+    });
+
+    res.json({ 
+      success: true,
+      flights: flights,
+      meta: {
+        total: flights.length,
+        from,
+        to,
+        departure,
+        passengers: parseInt(adults) + parseInt(children) + parseInt(infants)
+      }
+    });
+  } catch (error) {
+    console.error('Flight search error:', error);
+    res.status(500).json({ error: 'Failed to search flights', details: error.message });
+  }
+});
+
+// Get flight by ID with full details
+app.get('/api/flights/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { flightClass = 'economy' } = req.query;
+
+    const [rows] = await db.query(`
+      SELECT 
+        f.*,
+        a.code as airline_code,
+        a.name as airline_name,
+        a.logo_url as airline_logo,
+        orig.code as origin_code,
+        orig.name as origin_name,
+        orig.city as origin_city,
+        dest.code as destination_code,
+        dest.name as destination_name,
+        dest.city as destination_city,
+        fc.name as flight_class_name,
+        fc.multiplier as class_multiplier
+      FROM flights f
+      JOIN airlines a ON f.airline_id = a.id
+      JOIN airports orig ON f.origin_airport_id = orig.id
+      JOIN airports dest ON f.destination_airport_id = dest.id
+      LEFT JOIN flight_classes fc ON fc.code = ?
+      WHERE f.id = ?
+    `, [flightClass, id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Flight not found' });
+    }
+
+    const row = rows[0];
+    const classMultiplier = row.class_multiplier || 1;
+
+    // Get promos for this flight
+    const [promos] = await db.query(`
+      SELECT p.code, p.title, p.short_title, p.description, p.discount_type, p.discount_value, p.max_discount
+      FROM promos p
+      JOIN flight_promos fp ON fp.promo_id = p.id
+      WHERE fp.flight_id = ? AND p.is_active = TRUE AND NOW() BETWEEN p.start_date AND p.end_date
+    `, [id]);
+
+    const flight = {
+      id: row.id,
+      flightNumber: row.flight_number,
+      airline: {
+        code: row.airline_code,
+        name: row.airline_name,
+        logo: row.airline_logo
+      },
+      origin: {
+        code: row.origin_code,
+        name: row.origin_name,
+        city: row.origin_city
+      },
+      destination: {
+        code: row.destination_code,
+        name: row.destination_name,
+        city: row.destination_city
+      },
+      departureTime: row.departure_time,
+      arrivalTime: row.arrival_time,
+      departureTerminal: row.departure_terminal,
+      arrivalTerminal: row.arrival_terminal,
+      price: Math.round(row.base_price * classMultiplier),
+      availableSeats: row.available_seats,
+      stops: 0,
+      flightClass: row.flight_class_name || 'Economy',
+      baggage: row.baggage_allowance,
+      cabinBaggage: row.cabin_baggage,
+      aircraft: row.aircraft_type,
+      seatLayout: row.seat_layout,
+      seatPitch: row.seat_pitch,
+      hasWifi: Boolean(row.has_wifi),
+      hasEntertainment: Boolean(row.has_entertainment),
+      hasPower: Boolean(row.has_power),
+      hasMeal: Boolean(row.has_meal),
+      isRefundable: Boolean(row.is_refundable),
+      isReschedulable: Boolean(row.is_reschedulable),
+      rescheduleFee: row.reschedule_fee,
+      promos: promos.map(p => ({
+        code: p.code,
+        title: p.title,
+        shortTitle: p.short_title,
+        description: p.description
+      }))
+    };
+
+    res.json({ success: true, flight });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch flight', details: error.message });
+  }
+});
+
+// Get active promos
+app.get('/api/promos', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT id, code, title, short_title, description, discount_type, discount_value, max_discount, min_purchase, applies_to
+      FROM promos 
+      WHERE is_active = TRUE AND NOW() BETWEEN start_date AND end_date
+      ORDER BY discount_value DESC
+    `);
+    res.json({ promos: rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch promos', details: error.message });
+  }
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
