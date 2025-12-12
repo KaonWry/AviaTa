@@ -203,12 +203,22 @@ main {
 
 .hero {
   margin-top: 24px;
-  background-color: #E6E9F0;
   border-radius: 20px;
   padding: 24px;
+  position: relative;
+  overflow: hidden;
+
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.55), rgba(0,0,0,0.18)),url("./IMG_0056.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .hero-inner {
+  position: relative;
+  z-index: 1;
+
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
@@ -218,7 +228,8 @@ main {
   flex: 1 1 260px;
   font-size: 14px;
   line-height: 1.5;
-  color: #333333;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.35);
 }
 
 .hero-heading {
@@ -230,6 +241,12 @@ main {
 .hero-sub {
   font-size: 13px;
   margin-bottom: 14px;
+}
+
+.hero .search-card {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* KARTU FORM PENCARIAN */
