@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { DestinationGrid } from "../components/ui/destination-card";
 import { JollyDatePicker } from "../components/ui/date-picker";
+import { AboutUsSection } from "../components/ui/testimonial-carousel";
 
 const COUNTRY_LIST = ["Singapore", "Malaysia", "Japan", "Korea Utara"];
 
@@ -186,6 +187,9 @@ const Home = () => {
             emptyMessage="Tidak ada destinasi untuk negara ini."
           />
         </section>
+
+        {/* About Us Section */}
+        <AboutUsSection className="mt-8" />
       </main>
     </div>
   );
