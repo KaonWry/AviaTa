@@ -25,9 +25,9 @@ app.post('/api/register', async (req, res) => {
       return res.status(409).json({ error: 'Email sudah terdaftar.' });
     }
     // Insert new user
-    await db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [name, email, password]);
+    await db.query('INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)', [name, email, password]);
     // Get the new user
-    const [rows] = await db.query('SELECT username FROM users WHERE email = ? LIMIT 1', [email]);
+    const [rows] = await db.query('SELECT full_name FROM users WHERE email = ? LIMIT 1', [email]);
     return res.json({ success: true, username: rows[0].username });
   } catch (error) {
     console.error(error);

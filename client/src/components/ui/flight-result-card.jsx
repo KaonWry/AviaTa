@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion"; // eslint-disable-line no-unused-vars
-import TicketTypeModal from "TicketTypeModal"; // sesuaikan path
+import TicketTypeModal from "./TicketTypeModal"; // sesuaikan path
 import { 
   Plane,
   Luggage,
