@@ -1,15 +1,49 @@
-import React from "react";
 import { cn } from "../../lib/utils";
+import { motion } from "framer-motion";
+
+// Animated Skeleton Card for loading state
+function SkeletonCard({ index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.3 }}
+      className="bg-white rounded-xl border border-[#E0E0E0] overflow-hidden"
+    >
+      {/* Image skeleton with shimmer effect */}
+      <motion.div 
+        className="h-[120px] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%]"
+        animate={{ backgroundPosition: ["100% 0", "-100% 0"] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+      />
+      <div className="p-4 space-y-2">
+        <motion.div 
+          className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] rounded w-3/4"
+          animate={{ backgroundPosition: ["100% 0", "-100% 0"] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.1 }}
+        />
+        <motion.div 
+          className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] rounded w-1/2"
+          animate={{ backgroundPosition: ["100% 0", "-100% 0"] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.2 }}
+        />
+      </div>
+    </motion.div>
+  );
+}
 
 // Destination Card with Hover Effects - Optimized for AviaTa Flight Booking
 export function DestinationCard({ title, description, image, index = 0 }) {
   return (
-    <article
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.4 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className={cn(
         "group/card relative bg-white rounded-xl border border-[#E0E0E0] overflow-hidden",
         "transition-all duration-300 ease-out",
-        "hover:shadow-xl hover:shadow-[#4A70A9]/10 hover:border-[#4A70A9]/30",
-        "hover:-translate-y-1"
+        "hover:shadow-xl hover:shadow-[#4A70A9]/10 hover:border-[#4A70A9]/30"
       )}
     >
       {/* Hover Gradient Overlay */}
@@ -63,41 +97,46 @@ export function DestinationCard({ title, description, image, index = 0 }) {
 
       {/* Bottom Action Hint */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4A70A9] to-[#8FABD4] transform scale-x-0 group-hover/card:scale-x-100 transition-transform duration-300 origin-left" />
-    </article>
+    </motion.article>
   );
 }
 
-// Destination Grid with Hover Effects
+// Destination Grid with Animated Loading Skeleton
 export function DestinationGrid({ destinations, loading, emptyMessage }) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <motion.div 
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         {[...Array(4)].map((_, idx) => (
-          <div
-            key={idx}
-            className="bg-white rounded-xl border border-[#E0E0E0] overflow-hidden animate-pulse"
-          >
-            <div className="h-[120px] bg-gray-200" />
-            <div className="p-4 space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-3/4" />
-              <div className="h-3 bg-gray-100 rounded w-1/2" />
-            </div>
-          </div>
+          <SkeletonCard key={idx} index={idx} />
         ))}
-      </div>
+      </motion.div>
     );
   }
 
   if (!destinations || destinations.length === 0) {
     return (
-      <div className="col-span-4 text-center py-10 text-sm text-gray-500">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="col-span-4 text-center py-10 text-sm text-gray-500"
+      >
         {emptyMessage || "Tidak ada destinasi tersedia."}
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+    <motion.div 
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       {destinations.map((item, idx) => (
         <DestinationCard
           key={idx}
@@ -107,7 +146,7 @@ export function DestinationGrid({ destinations, loading, emptyMessage }) {
           index={idx}
         />
       ))}
-    </div>
+    </motion.div>
   );
 }
 
