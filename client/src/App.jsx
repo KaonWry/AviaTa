@@ -15,6 +15,7 @@ const Orders = lazy(() => import("./pages/Orders"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const Passengers = lazy(() => import("./pages/Passengers"));
 const PurchaseList = lazy(() => import("./pages/PurchaseList"));
+const SearchFlights = lazy(() => import("./pages/SearchFlights"));
 
 const navItems = [
   { name: "Beranda", url: "/", icon: HomeIcon },
@@ -38,6 +39,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/search" element={<SearchFlights />} />
             
             {/* Account Routes */}
             <Route path="/account" element={<Navigate to="/account/orders" replace />} />
