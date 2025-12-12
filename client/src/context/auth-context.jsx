@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
+// import { useNavigate } from "react-router-dom";
+
 
 const AuthContext = createContext({
   user: null,
@@ -12,6 +14,8 @@ const AuthContext = createContext({
 export function AuthProvider({ children, storageKey = "aviata-auth" }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  // const navigate = useNavigate();
+
 
   // Check for existing session on mount
   useEffect(() => {
@@ -75,6 +79,7 @@ export function AuthProvider({ children, storageKey = "aviata-auth" }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem(storageKey);
+    // navigate("/");
   };
 
   return (

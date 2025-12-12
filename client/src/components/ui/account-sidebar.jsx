@@ -53,8 +53,8 @@ export function AccountSidebar({ className }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
     navigate("/");
+    logout();
   };
 
   return (
