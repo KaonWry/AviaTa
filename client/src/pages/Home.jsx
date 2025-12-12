@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { DestinationGrid } from "../components/ui/destination-card";
+import { JollyDatePicker } from "../components/ui/date-picker";
 
 const COUNTRY_LIST = ["Singapore", "Malaysia", "Japan", "Korea Utara"];
 
@@ -86,25 +87,17 @@ const Home = () => {
                   />
                 </div>
                 <div className="field flex flex-col gap-1">
-                  <label htmlFor="depart-guest" className="text-xs text-white">
-                    Tanggal berangkat
-                  </label>
-                  <input
-                    id="depart-guest"
-                    name="depart"
-                    type="date"
-                    className="rounded-full border bg-background text-foreground border-border px-2 py-1 text-sm"
+                  <JollyDatePicker 
+                    label={<span className="text-xs text-white">Tanggal berangkat</span>}
+                    className="[&_[data-slot=label]]:text-white"
+                    granularity="day"
                   />
                 </div>
                 <div className="field flex flex-col gap-1">
-                  <label htmlFor="return-guest" className="text-xs text-white">
-                    Tanggal pulang
-                  </label>
-                  <input
-                    id="return-guest"
-                    name="return"
-                    type="date"
-                    className="rounded-full border bg-background text-foreground border-border px-2 py-1 text-sm"
+                  <JollyDatePicker 
+                    label={<span className="text-xs text-white">Tanggal pulang</span>}
+                    className="[&_[data-slot=label]]:text-white"
+                    granularity="day"
                   />
                 </div>
                 <div className="field flex flex-col gap-1">
