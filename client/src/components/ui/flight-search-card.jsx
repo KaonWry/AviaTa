@@ -51,10 +51,15 @@ function SwapButton({ onClick }) {
   return (
     <button
       type="button"
-      onClick={onClick}
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-background border border-border shadow-sm flex items-center justify-center hover:bg-muted hover:border-primary/50 transition-all"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      }}
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[500] w-10 h-10 rounded-full bg-card border-2 border-primary/50 shadow-xl flex items-center justify-center hover:bg-primary hover:border-primary hover:scale-110 active:scale-95 transition-all duration-200 group cursor-pointer"
+      aria-label="Tukar bandara keberangkatan dan tujuan"
     >
-      <ArrowLeftRight className="w-4 h-4 text-muted-foreground" />
+      <ArrowLeftRight className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
     </button>
   );
 }
@@ -262,13 +267,13 @@ export function FlightSearchCard({ className }) {
   };
 
   return (
-    <div className={cn("bg-card rounded-2xl shadow-xl p-6 border border-border", className)}>
+    <div className={cn("bg-card rounded-2xl shadow-xl p-6 border border-border overflow-visible", className)}>
       {/* Trip Type Toggle */}
       <TripTypeToggle tripType={tripType} setTripType={setTripType} />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 overflow-visible">
         {/* From / To Row */}
-        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4 overflow-visible">
           <AirportSearchInput
             type="departure"
             placeholder="Terbang dari mana?"
@@ -279,10 +284,8 @@ export function FlightSearchCard({ className }) {
             id="from"
           />
           
-          {/* Swap Button - Only visible on md+ */}
-          <div className="hidden md:block">
-            <SwapButton onClick={handleSwap} />
-          </div>
+          {/* Swap Button - Positioned in the middle */}
+          <SwapButton onClick={handleSwap} />
           
           <AirportSearchInput
             type="arrival"

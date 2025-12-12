@@ -206,6 +206,11 @@ function AirportSearchInput({
 
   const IconComponent = type === "departure" ? PlaneTakeoff : PlaneLanding;
 
+  // Sync internal query state when external value prop changes (e.g., swap)
+  useEffect(() => {
+    setQuery(value);
+  }, [value]);
+
   // Load recent searches from localStorage
   useEffect(() => {
     const stored = localStorage.getItem(`recent-airports-${type}`);
@@ -329,7 +334,7 @@ function AirportSearchInput({
   };
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative z-[50]", className)} style={{ isolation: 'isolate' }}>
       {label && (
         <label
           htmlFor={id}
@@ -394,7 +399,7 @@ function AirportSearchInput({
           {isFocused && results.length > 0 && (
             <motion.div
               ref={dropdownRef}
-              className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-xl shadow-xl z-50 overflow-hidden"
+              className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-xl shadow-2xl z-[9999] overflow-hidden"
               variants={containerVariants}
               initial="hidden"
               animate="show"
@@ -402,17 +407,17 @@ function AirportSearchInput({
             >
               {/* Recent Searches Header */}
               {!debouncedQuery && recentSearches.length > 0 && (
-                <div className="px-4 py-2 bg-muted/50 border-b border-border">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="px-3 py-1.5 bg-muted/50 border-b border-border">
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-wide">
                     <Clock className="w-3 h-3" />
-                    <span>Pencarian Terakhir</span>
+                    <span>Terakhir dicari</span>
                   </div>
                 </div>
               )}
 
               {/* Airport List */}
-              <ul className="max-h-[300px] overflow-y-auto py-2">
-                {results.map((airport, index) => {
+              <ul className="max-h-[240px] overflow-y-auto py-1 scrollbar-thin">
+                {results.slice(0, 5).map((airport, index) => {
                   const isRecent = recentSearches.some(r => r.id === airport.id) && !debouncedQuery;
                   
                   return (
@@ -425,72 +430,53 @@ function AirportSearchInput({
                         type="button"
                         onClick={() => handleAirportSelect(airport)}
                         className={cn(
-                          "w-full px-4 py-3 flex items-start gap-3 text-left",
+                          "w-full px-3 py-2.5 flex items-start gap-2.5 text-left",
                           "hover:bg-muted/70 transition-colors cursor-pointer",
                           "focus:outline-none focus:bg-muted/70",
-                          index < results.length - 1 && "border-b border-border/50"
+                          index < Math.min(results.length, 5) - 1 && "border-b border-border/30"
                         )}
                       >
                         {/* Icon */}
                         <div className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                          "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
                           isRecent 
                             ? "bg-amber-500/10 text-amber-500" 
                             : "bg-primary/10 text-primary"
                         )}>
                           {isRecent ? (
-                            <Clock className="w-5 h-5" />
+                            <Clock className="w-4 h-4" />
                           ) : (
-                            <Building2 className="w-5 h-5" />
+                            <Building2 className="w-4 h-4" />
                           )}
                         </div>
 
                         {/* Airport Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">
+                            <span className="font-semibold text-foreground text-sm">
                               {airport.code}
                             </span>
-                            <span className="text-sm text-muted-foreground truncate">
+                            <span className="text-xs text-muted-foreground truncate">
                               {airport.name}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex items-center gap-1 mt-0.5">
                             <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {airport.city}, {airport.country}
                             </span>
                           </div>
-                          {airport.description && (
-                            <span className="text-xs text-muted-foreground/70 mt-1 block">
-                              {airport.description}
-                            </span>
-                          )}
                         </div>
 
-                        {/* Country Flag Placeholder */}
-                        <div className="shrink-0">
-                          <span className="text-lg">🇮🇩</span>
+                        {/* Country Code */}
+                        <div className="shrink-0 text-xs font-medium text-primary">
+                          ID
                         </div>
                       </button>
                     </motion.li>
                   );
                 })}
               </ul>
-
-              {/* Footer */}
-              <div className="px-4 py-2 bg-muted/30 border-t border-border">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">↑↓</kbd>
-                    <span>untuk navigasi</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Enter</kbd>
-                    <span>untuk pilih</span>
-                  </span>
-                </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -499,7 +485,7 @@ function AirportSearchInput({
         <AnimatePresence>
           {isFocused && debouncedQuery && results.length === 0 && (
             <motion.div
-              className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-xl shadow-xl z-50 p-8 text-center"
+              className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-xl shadow-2xl z-[9999] p-8 text-center"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
