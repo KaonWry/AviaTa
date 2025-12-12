@@ -4,14 +4,29 @@ import React, { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "../../lib/utils"
-import { Plane } from "lucide-react"
+import { Plane, LogIn, UserPlus, Sun, Moon } from "lucide-react"
+import { useAuth } from "../../context/auth-context"
+import { useTheme } from "../../context/theme-context"
 
 export function AnimeNavBar({ items, className, defaultActive = "Home" }) {
   const location = useLocation()
+  const { isAuthenticated, user } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [hoveredTab, setHoveredTab] = useState(null)
   const [activeTab, setActiveTab] = useState(defaultActive)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Filter items based on auth status
+  const guestItems = [
+    { name: "Login", url: "/login", icon: LogIn },
+    { name: "Daftar", url: "/register", icon: UserPlus },
+  ]
+
+  // Items to show based on authentication
+  const displayItems = isAuthenticated 
+    ? items 
+    : [...items.filter(item => !["Pesananku", "Akun"].includes(item.name)), ...guestItems]
 
   useEffect(() => {
     setMounted(true)
@@ -29,11 +44,12 @@ export function AnimeNavBar({ items, className, defaultActive = "Home" }) {
 
   // Update active tab based on current route
   useEffect(() => {
-    const currentItem = items.find(item => item.url === location.pathname)
+    const allItems = [...items, ...guestItems]
+    const currentItem = allItems.find(item => item.url === location.pathname)
     if (currentItem) {
       setActiveTab(currentItem.name)
     }
-  }, [location.pathname, items])
+  }, [location.pathname, items, isAuthenticated])
 
   if (!mounted) return null
 
@@ -41,7 +57,7 @@ export function AnimeNavBar({ items, className, defaultActive = "Home" }) {
     <div className="fixed top-5 left-0 right-0 z-[9999]">
       <div className="flex justify-center pt-6">
         <motion.div 
-          className="flex items-center gap-3 bg-[#1a1a2e]/90 border border-white/10 backdrop-blur-lg py-2 px-2 rounded-full shadow-lg relative"
+          className="flex items-center gap-2 bg-[#1a1a2e]/90 border border-white/10 backdrop-blur-lg py-2 px-2 rounded-full shadow-lg relative"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{
@@ -50,7 +66,43 @@ export function AnimeNavBar({ items, className, defaultActive = "Home" }) {
             damping: 20,
           }}
         >
-          {items.map((item) => {
+          {/* Theme Toggle Button */}
+          <motion.button
+            onClick={toggleTheme}
+            className="relative cursor-pointer p-3 rounded-full transition-all duration-300 text-white/70 hover:text-white hover:bg-white/10"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+          >
+            <AnimatePresence mode="wait">
+              {theme === "light" ? (
+                <motion.div
+                  key="moon"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Moon size={18} strokeWidth={2.5} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="sun"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Sun size={18} strokeWidth={2.5} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
+
+          {/* Divider */}
+          <div className="w-px h-6 bg-white/20" />
+
+          {displayItems.map((item) => {
             const Icon = item.icon
             const isActive = activeTab === item.name
             const isHovered = hoveredTab === item.name

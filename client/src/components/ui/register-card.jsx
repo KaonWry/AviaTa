@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Instagram, Linkedin, Facebook, Eye, EyeOff } from 'lucide-react';
 import AppInput from './app-input';
+import { useAuth } from '../../context/auth-context';
 
 const RegisterCard = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -13,7 +14,9 @@ const RegisterCard = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleMouseMove = (e) => {
     const leftSection = e.currentTarget.getBoundingClientRect();
@@ -42,6 +45,7 @@ const RegisterCard = () => {
       setError('Password dan konfirmasi password tidak cocok.');
       return;
     }
+    setIsLoading(true);
     try {
       const res = await fetch('http://localhost:3001/api/register', {
         method: 'POST',
@@ -50,13 +54,16 @@ const RegisterCard = () => {
       });
       const data = await res.json();
       if (data.success) {
-        localStorage.setItem('username', data.username);
+        // Use auth context to register
+        await register(name, email, password);
         navigate('/');
       } else {
         setError(data.error || 'Registrasi gagal.');
       }
     } catch {
       setError('Server error.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -187,9 +194,12 @@ const RegisterCard = () => {
               <div className='flex gap-4 justify-center items-center mt-2'>
                 <button 
                   type="submit"
-                  className="group/button relative inline-flex justify-center items-center overflow-hidden rounded-md bg-[var(--color-border)] px-4 py-1.5 text-xs font-normal text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-[var(--color-text-primary)]/20 cursor-pointer"
+                  disabled={isLoading}
+                  className="group/button relative inline-flex justify-center items-center overflow-hidden rounded-md bg-[var(--color-border)] px-4 py-1.5 text-xs font-normal text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-[var(--color-text-primary)]/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="text-sm px-4 py-1 text-[var(--color-text-primary)]">Daftar</span>
+                  <span className="text-sm px-4 py-1 text-[var(--color-text-primary)]">
+                    {isLoading ? "Memuat..." : "Daftar"}
+                  </span>
                   <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
                     <div className="relative h-full w-8 bg-white/20" />
                   </div>

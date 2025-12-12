@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Instagram, Linkedin, Facebook, Eye, EyeOff } from 'lucide-react';
 import AppInput from './app-input';
+import { useAuth } from '../../context/auth-context';
 
 const LoginCard = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -10,7 +11,9 @@ const LoginCard = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleMouseMove = (e) => {
     const leftSection = e.currentTarget.getBoundingClientRect();
@@ -35,6 +38,7 @@ const LoginCard = () => {
       setError("Silakan isi email/nomor HP dan password.");
       return;
     }
+    setIsLoading(true);
     try {
       const res = await fetch("http://localhost:3001/api/login", {
         method: "POST",
@@ -43,14 +47,16 @@ const LoginCard = () => {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        localStorage.setItem('username', data.username);
+        // Use auth context to login
+        await login(id, password);
         navigate("/");
-        window.location.reload();
       } else {
         setError(data.error || "Login gagal.");
       }
     } catch {
       setError("Terjadi kesalahan server.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -156,9 +162,12 @@ const LoginCard = () => {
               <div className='flex gap-4 justify-center items-center'>
                 <button 
                   type="submit"
-                  className="group/button relative inline-flex justify-center items-center overflow-hidden rounded-md bg-[var(--color-border)] px-4 py-1.5 text-xs font-normal text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-[var(--color-text-primary)]/20 cursor-pointer"
+                  disabled={isLoading}
+                  className="group/button relative inline-flex justify-center items-center overflow-hidden rounded-md bg-[var(--color-border)] px-4 py-1.5 text-xs font-normal text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-[var(--color-text-primary)]/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="text-sm px-4 py-1 text-[var(--color-text-primary)]">Masuk</span>
+                  <span className="text-sm px-4 py-1 text-[var(--color-text-primary)]">
+                    {isLoading ? "Memuat..." : "Masuk"}
+                  </span>
                   <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
                     <div className="relative h-full w-8 bg-white/20" />
                   </div>

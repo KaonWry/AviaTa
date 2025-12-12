@@ -4,6 +4,7 @@ import { PageLoader } from "./components/ui/page-loader";
 import { AnimeNavBar } from "./components/ui/anime-navbar";
 import { FooterSection } from "./components/ui/footer-section";
 import { ThemeProvider } from "./context/theme-context";
+import { AuthProvider } from "./context/auth-context";
 import { Home as HomeIcon, Search, Ticket, User } from "lucide-react";
 
 // Lazy load pages untuk better performance
@@ -44,7 +45,9 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="aviata-theme">
-      <AppContent />
+      <AuthProvider storageKey="aviata-auth">
+        <AppContent />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
