@@ -606,7 +606,8 @@ function PromosTab({ flight }) {
 export function FlightResultCard({ flight, onSelect }) {
   const [ticketOpen, setTicketOpen] = useState(false);
   const [activeFlight, setActiveFlight] = useState(null);
-
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState('details');
   const tabs = [
     { id: 'details', label: 'Flight Details' },
     { id: 'fare', label: 'Fare & Benefits' },

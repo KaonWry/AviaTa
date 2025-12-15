@@ -86,7 +86,7 @@ INSERT INTO flights (
 -- Seed Sample Users
 INSERT INTO users (email, password, full_name, gender, birth_date, city, priority_level, points) VALUES
 ('demo@aviata.com', '$2b$10$example_hashed_password', 'Demo User', 'male', '1995-05-15', 'Jakarta', 'bronze', 0),
-('admin@aviata.com', '$2b$10$example_hashed_password', 'Admin AviaTa', 'male', '1990-01-01', 'Jakarta', 'platinum', 50000)
+('admin@aviata.com', 'admin', 'Admin AviaTa', 'male', '1990-01-01', 'Jakarta', 'platinum', 50000)
 ON DUPLICATE KEY UPDATE email=email;
 
 -- Seed Sample Saved Passengers for demo user (assuming id=1)

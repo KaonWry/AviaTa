@@ -3,6 +3,36 @@
 -- Updated with Refund, Reschedule, and Promo features
 -- =============================================
 
+-- Matikan pengecekan foreign key sementara agar bisa drop tabel tanpa error urutan
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Hapus semua tabel jika ada (Reset database)
+DROP TABLE IF EXISTS 
+    refund_policies, 
+    reschedule_requests, 
+    refund_requests, 
+    flight_promos, 
+    promos, 
+    point_transactions, 
+    transactions, 
+    booking_passengers, 
+    bookings, 
+    user_cards, 
+    saved_passengers, 
+    user_phones, 
+    user_emails, 
+    users, 
+    flights, 
+    flight_classes, 
+    airports, 
+    airlines;
+
+-- Nyalakan kembali pengecekan foreign key
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =============================================
+-- AviaTa Database Schema v3.0
+-- ... (lanjutan kode asli kamu di bawah sini)
 -- Create Airlines Table
 CREATE TABLE IF NOT EXISTS airlines (
     id INT AUTO_INCREMENT PRIMARY KEY,
