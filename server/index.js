@@ -274,7 +274,7 @@ app.get('/api/flights/search', async (req, res) => {
         f.flight_number,
         f.departure_time,
         f.arrival_time,
-        f.price as base_price,
+        f.base_price,
         a.id as airline_id,
         a.code as airline_code,
         a.name as airline_name,
