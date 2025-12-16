@@ -52,6 +52,8 @@ export function AccountSidebar({ className }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const displayName = user?.full_name || user?.name;
+
   const handleLogout = () => {
     navigate("/");
     logout();
@@ -63,14 +65,14 @@ export function AccountSidebar({ className }) {
       <div className="p-6 border-b border-border">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-lg font-bold text-muted-foreground">
-            {getInitials(user?.name)}
+            {getInitials(displayName)}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-foreground truncate">
-              {user?.name || "Guest"}
+              {displayName || "Guest"}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {user?.provider || "Email"}
+              {user?.email || ""}
             </p>
           </div>
         </div>

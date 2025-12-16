@@ -184,8 +184,8 @@ export function Passengers() {
     {
       id: 1,
       title: "Tn.",
-      firstName: user?.name?.split(" ")[0] || "User",
-      lastName: user?.name?.split(" ").slice(1).join(" ") || "",
+      firstName: (user?.full_name || user?.name)?.split(" ")[0] || "User",
+      lastName: (user?.full_name || user?.name)?.split(" ").slice(1).join(" ") || "",
       nationality: "Indonesia",
       idType: "KTP",
       idNumber: ""

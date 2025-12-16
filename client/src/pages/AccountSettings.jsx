@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -68,20 +68,35 @@ function CustomSelect({ label, value, onChange, options, placeholder }) {
 function PersonalDataForm({ user }) {
   const { updateUser } = useAuth();
 
+  const toGenderLabel = (value) => {
+    if (!value) return "";
+    const v = String(value).toLowerCase();
+    if (v === "male") return "Laki-laki";
+    if (v === "female") return "Perempuan";
+    return value;
+  };
+
+  const normalizeDatePart = (value) => {
+    if (!value) return "";
+    const s = String(value);
+    return s.includes("T") ? s.slice(0, 10) : s;
+  };
+
   // Parse birth_date (YYYY-MM-DD) if available
   let birthDay = "";
   let birthMonth = "";
   let birthYear = "";
-  if (user?.birth_date) {
-    const [y, m, d] = user.birth_date.split("-");
-    birthDay = d;
+  const normalizedBirthDate = normalizeDatePart(user?.birth_date);
+  if (normalizedBirthDate && /^\d{4}-\d{2}-\d{2}$/.test(normalizedBirthDate)) {
+    const [y, m, d] = normalizedBirthDate.split("-");
+    birthDay = String(parseInt(d, 10));
     birthMonth =
       ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][parseInt(m, 10) - 1];
     birthYear = y;
   }
   const [formData, setFormData] = useState({
     fullName: user?.full_name || user?.name || "",
-    gender: user?.gender || "Laki-laki",
+    gender: toGenderLabel(user?.gender) || "Laki-laki",
     birthDay: birthDay || "1",
     birthMonth: birthMonth || "Januari",
     birthYear: birthYear || "2000",
@@ -104,6 +119,31 @@ function PersonalDataForm({ user }) {
     { value: "Laki-laki", label: "Laki-laki" },
     { value: "Perempuan", label: "Perempuan" }
   ];
+
+  // Keep form in sync when session user is refreshed
+  useEffect(() => {
+    const nextBirthDate = normalizeDatePart(user?.birth_date);
+    let nextDay = "1";
+    let nextMonth = "Januari";
+    let nextYear = "2000";
+    if (nextBirthDate && /^\d{4}-\d{2}-\d{2}$/.test(nextBirthDate)) {
+      const [y, m, d] = nextBirthDate.split("-");
+      nextDay = String(parseInt(d, 10));
+      nextMonth =
+        ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][parseInt(m, 10) - 1] || nextMonth;
+      nextYear = y;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      fullName: user?.full_name || user?.name || "",
+      gender: toGenderLabel(user?.gender) || "Laki-laki",
+      birthDay: nextDay,
+      birthMonth: nextMonth,
+      birthYear: nextYear,
+      city: user?.city || "",
+    }));
+  }, [user?.id, user?.full_name, user?.name, user?.gender, user?.birth_date, user?.city]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
