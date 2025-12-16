@@ -75,7 +75,7 @@ function AirportSearchInput({
         // Logic pintar: deteksi apakah data itu Array atau Object { airports: [] }
         const airportList = Array.isArray(data) ? data : (data.airports || []);
 
-        console.log(`✅ BERHASIL LOAD: ${airportList.length} bandara dari Database!`);
+        console.log(` BERHASIL LOAD: ${airportList.length} bandara dari Database!`);
 
         if (airportList.length > 0) {
           const formattedAirports = airportList.map((airport, index) => ({
@@ -88,7 +88,7 @@ function AirportSearchInput({
           setAirportsData(formattedAirports);
         }
       } catch (err) {
-        console.error('❌ ERROR API:', err);
+        console.error(' ERROR API:', err);
       } finally {
         setIsLoadingAirports(false);
       }
