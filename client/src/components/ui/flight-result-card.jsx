@@ -1,65 +1,44 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion"; 
-import TicketTypeModal from "./TicketTypeModal";
+import TicketTypeModal from "./TicketTypeModal"; 
 import { 
-  Plane,
-  Luggage,
-  Utensils,
-  Wifi,
-  Zap,
-  ChevronDown,
-  ChevronUp,
-  Check,
-  X,
-  Clock,
-  Calendar,
-  Tag,
-  RefreshCw,
-  AlertCircle,
-  Info,
-  Gift,
-  CreditCard,
-  Shield,
-  Armchair,
-  PlugZap,
-  Tv
+  Plane, Luggage, Utensils, Wifi, Zap, ChevronUp, Check, X, 
+  RefreshCw, Gift, Armchair, PlugZap, Tv, AlertCircle
 } from "lucide-react";
 
-// Format price to IDR
+// --- HELPER FUNCTIONS (Safe Mode) ---
 function formatPrice(price) {
+  if (!price) return "Rp 0";
   return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0
   }).format(price);
 }
 
-// Format time
 function formatTime(dateString) {
-  return new Date(dateString).toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  if (!dateString) return "--:--";
+  try {
+    return new Date(dateString).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return "--:--"; }
 }
 
-// Format date
 function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'short'
-  });
+  if (!dateString) return "-";
+  try {
+    return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  } catch (e) { return "-"; }
 }
 
-// Calculate duration
 function calculateDuration(departure, arrival) {
-  const diff = new Date(arrival) - new Date(departure);
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  return `${hours}j ${minutes}m`;
+  if (!departure || !arrival) return "-";
+  try {
+    const diff = new Date(arrival) - new Date(departure);
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}j ${minutes}m`;
+  } catch (e) { return "-"; }
 }
 
-// Tab Button Component
+// --- SUB COMPONENTS ---
 function TabButton({ active, onClick, children }) {
   return (
     <button
@@ -75,72 +54,63 @@ function TabButton({ active, onClick, children }) {
   );
 }
 
-// Flight Details Tab Content
 function FlightDetailsTab({ flight }) {
-  // Mapping data fasilitas (handle case sensitive)
-  const hasWifi = flight.hasWifi || flight.has_wifi;
-  const hasMeal = flight.hasMeal || flight.has_meal;
-  const hasEntertainment = flight.hasEntertainment || flight.has_entertainment;
-  const hasPower = flight.hasPower || flight.has_power;
+  const hasWifi = flight?.hasWifi || flight?.has_wifi;
+  const hasMeal = flight?.hasMeal || flight?.has_meal;
+  const hasEntertainment = flight?.hasEntertainment || flight?.has_entertainment;
+  const hasPower = flight?.hasPower || flight?.has_power;
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* Timeline */}
       <div className="flex items-start gap-4">
+        {/* Timeline */}
         <div className="flex flex-col items-center">
-          <div className="text-sm font-medium text-foreground">{formatTime(flight.departureTime)}</div>
-          <div className="text-xs text-muted-foreground">{formatDate(flight.departureTime)}</div>
+          <div className="text-sm font-medium text-foreground">{formatTime(flight?.departureTime)}</div>
+          <div className="text-xs text-muted-foreground">{formatDate(flight?.departureTime)}</div>
           <div className="w-3 h-3 rounded-full bg-primary mt-2" />
           <div className="w-0.5 h-32 bg-border my-2" />
           <div className="w-3 h-3 rounded-full border-2 border-primary bg-background" />
-          <div className="text-sm font-medium text-foreground mt-2">{formatTime(flight.arrivalTime)}</div>
-          <div className="text-xs text-muted-foreground">{formatDate(flight.arrivalTime)}</div>
+          <div className="text-sm font-medium text-foreground mt-2">{formatTime(flight?.arrivalTime)}</div>
+          <div className="text-xs text-muted-foreground">{formatDate(flight?.arrivalTime)}</div>
         </div>
         
         <div className="flex-1 space-y-4">
-          {/* Departure */}
           <div>
-            <p className="font-semibold text-foreground">{flight.origin.city} ({flight.origin.code})</p>
-            <p className="text-sm text-muted-foreground">{flight.origin.name}</p>
-            <p className="text-sm text-muted-foreground">Terminal {flight.departureTerminal || '2'}</p>
+            <p className="font-semibold text-foreground">{flight?.origin?.city || "Origin"} ({flight?.origin?.code || "ORG"})</p>
+            <p className="text-sm text-muted-foreground">{flight?.origin?.name}</p>
+            <p className="text-sm text-muted-foreground">Terminal {flight?.departureTerminal || '2'}</p>
           </div>
 
-          {/* Flight Info Box */}
           <div className="bg-muted/50 rounded-lg p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-foreground">{flight.airline.name}</span>
+              <span className="font-medium text-foreground">{flight?.airline?.name || "Airline"}</span>
               <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded">
-                {flight.airline.code}
+                {flight?.airline?.code || "FL"}
               </span>
             </div>
             <div className="text-sm text-muted-foreground">
-              {flight.flightNumber} • {flight.flightClass || 'Economy'}
+              {flight?.flightNumber || "FL-000"} • {flight?.flightClass || 'Economy'}
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="flex items-center gap-2 text-sm">
                 <Luggage className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Baggage {flight.baggage || '0'} kg</span>
+                <span className="text-muted-foreground">Baggage {flight?.baggage || '0'} kg</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Luggage className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Cabin baggage 7 kg</span>
+                <span className="text-muted-foreground">Cabin 7 kg</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Plane className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">{flight.aircraft || 'Airbus A320'}</span>
+                <span className="text-muted-foreground">{flight?.aircraft || 'Airbus A320'}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Armchair className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">{flight.seatLayout || '3-3'} Seat layout</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Armchair className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">{flight.seatPitch || '28'}-inches Seat pitch</span>
+                <span className="text-muted-foreground">{flight?.seatLayout || '3-3'} Seat</span>
               </div>
             </div>
 
-            {/* SECTION FASILITAS TAMBAHAN */}
             <div className="space-y-2 pt-2 border-t border-border/50 mt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                 <div className={`flex items-center gap-2 text-sm ${hasWifi ? 'text-foreground' : 'text-muted-foreground/50'}`}>
@@ -153,21 +123,20 @@ function FlightDetailsTab({ flight }) {
                    <Tv className="w-4 h-4" /> <span>{hasEntertainment ? "Entertainment" : "No Entertainment"}</span>
                 </div>
                 <div className={`flex items-center gap-2 text-sm ${hasPower ? 'text-foreground' : 'text-muted-foreground/50'}`}>
-                   <PlugZap className="w-4 h-4" /> <span>{hasPower ? "USB/Power Port" : "No Power Port"}</span>
+                   <PlugZap className="w-4 h-4" /> <span>{hasPower ? "Power Port" : "No Power Port"}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="text-sm text-muted-foreground">
-            {calculateDuration(flight.departureTime, flight.arrivalTime)}
+            {calculateDuration(flight?.departureTime, flight?.arrivalTime)}
           </div>
 
-          {/* Arrival */}
           <div>
-            <p className="font-semibold text-foreground">{flight.destination.city} ({flight.destination.code})</p>
-            <p className="text-sm text-muted-foreground">{flight.destination.name}</p>
-            <p className="text-sm text-muted-foreground">Terminal {flight.arrivalTerminal || '4'}</p>
+            <p className="font-semibold text-foreground">{flight?.destination?.city || "Dest"} ({flight?.destination?.code || "DES"})</p>
+            <p className="text-sm text-muted-foreground">{flight?.destination?.name}</p>
+            <p className="text-sm text-muted-foreground">Terminal {flight?.arrivalTerminal || '4'}</p>
           </div>
         </div>
       </div>
@@ -175,49 +144,35 @@ function FlightDetailsTab({ flight }) {
   );
 }
 
-// Fare & Benefits Tab Content
 function FareBenefitsTab({ flight }) {
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* Conditions */}
       <div className="bg-muted/30 rounded-xl p-4 space-y-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
             <Plane className="w-4 h-4 text-muted-foreground" />
           </div>
           <div>
-            <p className="font-medium text-foreground">{flight.airline.name}</p>
+            <p className="font-medium text-foreground">{flight?.airline?.name}</p>
             <p className="text-sm text-muted-foreground">
-              {flight.origin.city} → {flight.destination.city} • {flight.flightClass || 'Economy'}
+              {flight?.origin?.city} → {flight?.destination?.city} • {flight?.flightClass || 'Economy'}
             </p>
           </div>
         </div>
 
         <div className="space-y-2 pt-2">
           <div className="flex items-center gap-2 text-sm">
-            {flight.isRefundable ? (
-              <>
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-green-600 font-medium">Refundable</span>
-              </>
+            {flight?.isRefundable ? (
+              <><Check className="w-4 h-4 text-green-500" /><span className="text-green-600 font-medium">Refundable</span></>
             ) : (
-              <>
-                <X className="w-4 h-4 text-red-500" />
-                <span className="text-red-600 font-medium">Non-Refundable</span>
-              </>
+              <><X className="w-4 h-4 text-red-500" /><span className="text-red-600 font-medium">Non-Refundable</span></>
             )}
           </div>
           <div className="flex items-center gap-2 text-sm">
-            {flight.isReschedulable ? (
-              <>
-                <RefreshCw className="w-4 h-4 text-green-500" />
-                <span className="text-green-600 font-medium">Reschedule Available</span>
-              </>
+            {flight?.isReschedulable ? (
+              <><RefreshCw className="w-4 h-4 text-green-500" /><span className="text-green-600 font-medium">Reschedule Available</span></>
             ) : (
-              <>
-                <RefreshCw className="w-4 h-4 text-red-500" />
-                <span className="text-red-600 font-medium">No Reschedule</span>
-              </>
+              <><RefreshCw className="w-4 h-4 text-red-500" /><span className="text-red-600 font-medium">No Reschedule</span></>
             )}
           </div>
         </div>
@@ -226,77 +181,37 @@ function FareBenefitsTab({ flight }) {
   );
 }
 
-// Refund Tab Content
 function RefundTab({ flight }) {
-  const [activeSection, setActiveSection] = useState('policy');
-  const sections = [
-    { id: 'policy', label: 'Your Refund Policy' },
-    { id: 'estimation', label: 'Refund Estimation' },
-    { id: 'process', label: 'Refund Process' },
-    { id: 'other', label: 'Other Refund Info' },
-  ];
-
   return (
     <div className="p-4 md:p-6">
-      <div className="bg-muted/30 rounded-xl p-4 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Plane className="w-4 h-4 text-muted-foreground" />
-            <span className="font-medium text-foreground">{flight.airline.name}</span>
-          </div>
-          <span className="text-sm text-muted-foreground">{flight.flightClass || 'Economy'}</span>
-        </div>
-        <div className="flex items-center gap-2 mt-3">
-          {flight.isRefundable ? (
-            <><Check className="w-4 h-4 text-green-500" /><span className="text-green-600 font-medium text-sm">Refundable</span></>
-          ) : (
-            <><X className="w-4 h-4 text-red-500" /><span className="text-red-600 font-medium text-sm">Non-Refundable</span></>
-          )}
-        </div>
-      </div>
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="md:w-56 shrink-0 space-y-2">
-          {sections.map((section) => (
-            <button key={section.id} onClick={() => setActiveSection(section.id)} className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors ${activeSection === section.id ? 'bg-primary/10 text-primary font-medium border border-primary/30' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50'}`}>
-              {section.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex-1">
-          {/* Konten sederhana untuk refund */}
-          <p className="text-sm text-muted-foreground">Refund details for section: <strong>{activeSection}</strong></p>
-        </div>
+      <div className="space-y-4">
+         <h4 className="font-semibold text-foreground">Refund Policy</h4>
+         <p className="text-sm text-muted-foreground">
+           {flight?.isRefundable ? "This flight is refundable. Terms and conditions apply." : "This flight is non-refundable."}
+         </p>
       </div>
     </div>
   );
 }
 
-// Reschedule Tab Content
 function RescheduleTab({ flight }) {
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div className={`rounded-xl p-4 ${flight.isReschedulable ? 'bg-green-50 dark:bg-green-500/10' : 'bg-red-50 dark:bg-red-500/10'}`}>
-        <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${flight.isReschedulable ? 'bg-green-100 dark:bg-green-500/20' : 'bg-red-100 dark:bg-red-500/20'}`}>
-            {flight.isReschedulable ? <Check className="w-5 h-5 text-green-600" /> : <X className="w-5 h-5 text-red-600" />}
-          </div>
-          <div>
-            <h4 className={`font-semibold ${flight.isReschedulable ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-              {flight.isReschedulable ? 'Reschedule with fees' : 'Reschedule not available'}
-            </h4>
-          </div>
-        </div>
-      </div>
+    <div className="p-4 md:p-6">
+       <div className="space-y-4">
+          <h4 className="font-semibold text-foreground">Reschedule Policy</h4>
+          <p className="text-sm text-muted-foreground">
+            {flight?.isReschedulable ? "Reschedule is available with a fee." : "Reschedule is not available for this flight."}
+          </p>
+       </div>
     </div>
   );
 }
 
-// Promos Tab Content
 function PromosTab({ flight }) {
   return (
     <div className="p-4 md:p-6 space-y-4">
       <h4 className="font-semibold text-foreground">Available Promos</h4>
-      {flight.promos && flight.promos.length > 0 ? (
+      {flight?.promos && flight.promos.length > 0 ? (
         <div className="space-y-3">
           {flight.promos.map((promo, idx) => (
             <div key={idx} className="flex items-start gap-4 p-4 bg-primary/5 rounded-xl border border-primary/20">
@@ -315,7 +230,7 @@ function PromosTab({ flight }) {
   );
 }
 
-// Main Flight Result Card Component
+// --- MAIN COMPONENT ---
 export function FlightResultCard({ flight, onSelect }) {
   const [ticketOpen, setTicketOpen] = useState(false);
   const [activeFlight, setActiveFlight] = useState(null);
@@ -330,6 +245,22 @@ export function FlightResultCard({ flight, onSelect }) {
     { id: 'promos', label: 'Promos', icon: Gift },
   ];
 
+  // DEBUG LOGGING: Cek console browser (F12) untuk melihat data
+  // console.log("Flight Data:", flight);
+
+  // Safety Check: Jika data flight kosong/undefined, tampilkan Skeleton Loader sederhana
+  if (!flight) {
+    return (
+      <div className="w-full h-32 bg-muted/20 border border-border rounded-xl flex items-center justify-center text-muted-foreground animate-pulse">
+        <p>Loading flight data...</p>
+      </div>
+    );
+  }
+
+  // Safety Check Level 2: Jika data Airline belum siap
+  const airlineLogo = flight.airline?.logo;
+  const airlineName = flight.airline?.name || "Airline";
+
   return (
     <>
       <motion.div
@@ -338,20 +269,19 @@ export function FlightResultCard({ flight, onSelect }) {
         animate={{ opacity: 1, y: 0 }}
         className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
       >
-        {/* Header - Always Visible */}
         <div className="p-4 md:p-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             {/* Airline Info */}
             <div className="flex items-center gap-3 md:w-44">
               <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-                {flight.airline.logo ? (
-                  <img src={flight.airline.logo} alt={flight.airline.name} className="w-8 h-8 object-contain" />
+                {airlineLogo ? (
+                  <img src={airlineLogo} alt={airlineName} className="w-8 h-8 object-contain" />
                 ) : (
                   <Plane className="w-5 h-5 text-muted-foreground" />
                 )}
               </div>
               <div>
-                <p className="font-medium text-foreground text-sm">{flight.airline.name}</p>
+                <p className="font-medium text-foreground text-sm">{airlineName}</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <div className="flex items-center gap-1 px-1.5 py-0.5 bg-muted rounded text-xs text-muted-foreground">
                     <Luggage className="w-3 h-3" />
@@ -365,7 +295,7 @@ export function FlightResultCard({ flight, onSelect }) {
             <div className="flex-1 flex items-center gap-4">
               <div className="text-center">
                 <p className="text-xl font-bold text-foreground">{formatTime(flight.departureTime)}</p>
-                <p className="text-sm text-muted-foreground">{flight.origin.code}</p>
+                <p className="text-sm text-muted-foreground">{flight.origin?.code || "ORG"}</p>
               </div>
               <div className="flex-1 flex flex-col items-center">
                 <p className="text-xs text-muted-foreground mb-1">
@@ -381,7 +311,7 @@ export function FlightResultCard({ flight, onSelect }) {
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold text-foreground">{formatTime(flight.arrivalTime)}</p>
-                <p className="text-sm text-muted-foreground">{flight.destination.code}</p>
+                <p className="text-sm text-muted-foreground">{flight.destination?.code || "DES"}</p>
               </div>
             </div>
 
@@ -392,7 +322,6 @@ export function FlightResultCard({ flight, onSelect }) {
             </div>
           </div>
 
-          {/* Tabs & Choose Button */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <div className="flex items-center overflow-x-auto no-scrollbar">
               {tabs.map((tab) => (
@@ -400,9 +329,7 @@ export function FlightResultCard({ flight, onSelect }) {
                   key={tab.id}
                   active={isExpanded && activeTab === tab.id}
                   onClick={() => {
-                    if (!isExpanded) {
-                      setIsExpanded(true);
-                    }
+                    if (!isExpanded) setIsExpanded(true);
                     setActiveTab(tab.id);
                   }}
                 >
@@ -426,7 +353,6 @@ export function FlightResultCard({ flight, onSelect }) {
           </div>
         </div>
 
-        {/* Expanded Tab Content */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -441,7 +367,6 @@ export function FlightResultCard({ flight, onSelect }) {
               {activeTab === 'reschedule' && <RescheduleTab flight={flight} />}
               {activeTab === 'promos' && <PromosTab flight={flight} />}
               
-              {/* Close Button */}
               <div className="px-4 pb-4">
                 <button
                   onClick={() => setIsExpanded(false)}
@@ -451,14 +376,11 @@ export function FlightResultCard({ flight, onSelect }) {
                   Hide Details
                 </button>
               </div>
-              
-              {/* NOTE: Modal DIHAPUS DARI SINI AGAR TIDAK HILANG SAAT DETAIL DITUTUP */}
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
 
-      {/* Modal dipindah ke sini (Di luar AnimatePresence) */}
       <TicketTypeModal
         open={ticketOpen}
         flight={activeFlight}
