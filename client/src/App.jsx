@@ -8,7 +8,7 @@ import { AuthProvider } from "./context/auth-context";
 import { FlightSelectionProvider } from "./context/FlightSelectionContext";
 import { Home as HomeIcon, Search, Ticket, User } from "lucide-react";
 
-// Lazy load pages untuk better performance
+// Lazy load pages
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
@@ -19,6 +19,8 @@ const PurchaseList = lazy(() => import("./pages/PurchaseList"));
 const SearchFlights = lazy(() => import("./pages/SearchFlights"));
 const CheckoutPage = lazy(() => import("./pages/checkoutpage"));
 
+// Import halaman BookingPage yang baru dibuat (Pastikan file ini ada di src/pages/)
+const BookingPage = lazy(() => import("./pages/BookingPage")); 
 
 const navItems = [
   { name: "Beranda", url: "/", icon: HomeIcon },
@@ -30,12 +32,21 @@ const navItems = [
 function AppContent() {
   const location = useLocation();
   
-  // Hide navbar and footer on login/register pages
-  const hideNavAndFooter = ["/login", "/register"].includes(location.pathname);
+  // --- PERBAIKAN 1: Tambahkan route booking ke daftar yang disembunyikan ---
+  // Ini akan menghilangkan Navbar & Footer utama di halaman booking
+  const hideNavAndFooter = [
+    "/login", 
+    "/register", 
+    "/account/passengers", // Route booking kamu saat ini
+    "/booking"             // Route alternatif jika mau pakai /booking
+  ].includes(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
+      
+      {/* Navbar hanya muncul jika TIDAK di halaman login/register/booking */}
       {!hideNavAndFooter && <AnimeNavBar items={navItems} defaultActive="Beranda" />}
+      
       <main className="flex-1">
         <Suspense fallback={<PageLoader isLoading={true} message="Memuat halaman..." />}>
           <Routes>
@@ -45,12 +56,15 @@ function AppContent() {
             <Route path="/search" element={<SearchFlights />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             
-            {/* Account Routes */}
+            {/* --- PERBAIKAN 2: Ganti komponen Passengers dengan BookingPage --- */}
+            {/* Menggunakan BookingPage akan menghilangkan Sidebar bawaan akun */}
+            <Route path="/account/passengers" element={<BookingPage />} />
+            
+            {/* Account Routes Lainnya */}
             <Route path="/account" element={<Navigate to="/account/orders" replace />} />
             <Route path="/account/orders" element={<Orders />} />
             <Route path="/account/purchases" element={<PurchaseList />} />
             <Route path="/account/settings" element={<AccountSettings />} />
-            <Route path="/account/passengers" element={<Passengers />} />
             
             {/* Legacy routes redirect */}
             <Route path="/profile" element={<Navigate to="/account/settings" replace />} />
@@ -58,6 +72,8 @@ function AppContent() {
           </Routes>
         </Suspense>
       </main>
+      
+      {/* Footer juga disembunyikan di halaman booking agar bersih */}
       {!hideNavAndFooter && <FooterSection />}
     </div>
   );
