@@ -1,25 +1,31 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion"; 
-import TicketTypeModal from "./TicketTypeModal"; 
+import TicketTypeModal from "./TicketTypeModal";
 import { 
   Plane,
   Luggage,
-  Gift,
+  Utensils,
+  Wifi,
+  Zap,
   ChevronDown,
   ChevronUp,
   Check,
   X,
-  Wifi,
-  PlugZap,
-  Tv,
-  Armchair,
-  RefreshCw,
-  Info,
+  Clock,
+  Calendar,
   Tag,
-  Clock
+  RefreshCw,
+  AlertCircle,
+  Info,
+  Gift,
+  CreditCard,
+  Shield,
+  Armchair,
+  PlugZap,
+  Tv
 } from "lucide-react";
 
-// --- HELPER FUNCTIONS ---
+// Format price to IDR
 function formatPrice(price) {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -29,6 +35,7 @@ function formatPrice(price) {
   }).format(price);
 }
 
+// Format time
 function formatTime(dateString) {
   return new Date(dateString).toLocaleTimeString('id-ID', {
     hour: '2-digit',
@@ -36,6 +43,7 @@ function formatTime(dateString) {
   });
 }
 
+// Format date
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString('id-ID', {
     day: 'numeric',
@@ -43,6 +51,7 @@ function formatDate(dateString) {
   });
 }
 
+// Calculate duration
 function calculateDuration(departure, arrival) {
   const diff = new Date(arrival) - new Date(departure);
   const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -50,8 +59,7 @@ function calculateDuration(departure, arrival) {
   return `${hours}j ${minutes}m`;
 }
 
-// --- SUB COMPONENTS ---
-
+// Tab Button Component
 function TabButton({ active, onClick, children }) {
   return (
     <button
@@ -67,9 +75,17 @@ function TabButton({ active, onClick, children }) {
   );
 }
 
+// Flight Details Tab Content
 function FlightDetailsTab({ flight }) {
+  // Mapping data fasilitas (handle case sensitive)
+  const hasWifi = flight.hasWifi || flight.has_wifi;
+  const hasMeal = flight.hasMeal || flight.has_meal;
+  const hasEntertainment = flight.hasEntertainment || flight.has_entertainment;
+  const hasPower = flight.hasPower || flight.has_power;
+
   return (
     <div className="p-4 md:p-6 space-y-6">
+      {/* Timeline */}
       <div className="flex items-start gap-4">
         <div className="flex flex-col items-center">
           <div className="text-sm font-medium text-foreground">{formatTime(flight.departureTime)}</div>
@@ -82,12 +98,14 @@ function FlightDetailsTab({ flight }) {
         </div>
         
         <div className="flex-1 space-y-4">
+          {/* Departure */}
           <div>
             <p className="font-semibold text-foreground">{flight.origin.city} ({flight.origin.code})</p>
             <p className="text-sm text-muted-foreground">{flight.origin.name}</p>
             <p className="text-sm text-muted-foreground">Terminal {flight.departureTerminal || '2'}</p>
           </div>
 
+          {/* Flight Info Box */}
           <div className="bg-muted/50 rounded-lg p-4 space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-medium text-foreground">{flight.airline.name}</span>
@@ -116,6 +134,28 @@ function FlightDetailsTab({ flight }) {
                 <Armchair className="w-4 h-4 text-muted-foreground" />
                 <span className="text-muted-foreground">{flight.seatLayout || '3-3'} Seat layout</span>
               </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Armchair className="w-4 h-4 text-muted-foreground" />
+                <span className="text-muted-foreground">{flight.seatPitch || '28'}-inches Seat pitch</span>
+              </div>
+            </div>
+
+            {/* SECTION FASILITAS TAMBAHAN */}
+            <div className="space-y-2 pt-2 border-t border-border/50 mt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                <div className={`flex items-center gap-2 text-sm ${hasWifi ? 'text-foreground' : 'text-muted-foreground/50'}`}>
+                   <Wifi className="w-4 h-4" /> <span>{hasWifi ? "Wi-Fi Available" : "No Wi-Fi"}</span>
+                </div>
+                <div className={`flex items-center gap-2 text-sm ${hasMeal ? 'text-foreground' : 'text-muted-foreground/50'}`}>
+                   <Utensils className="w-4 h-4" /> <span>{hasMeal ? "In-flight Meal" : "No Meal"}</span>
+                </div>
+                <div className={`flex items-center gap-2 text-sm ${hasEntertainment ? 'text-foreground' : 'text-muted-foreground/50'}`}>
+                   <Tv className="w-4 h-4" /> <span>{hasEntertainment ? "Entertainment" : "No Entertainment"}</span>
+                </div>
+                <div className={`flex items-center gap-2 text-sm ${hasPower ? 'text-foreground' : 'text-muted-foreground/50'}`}>
+                   <PlugZap className="w-4 h-4" /> <span>{hasPower ? "USB/Power Port" : "No Power Port"}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -123,6 +163,7 @@ function FlightDetailsTab({ flight }) {
             {calculateDuration(flight.departureTime, flight.arrivalTime)}
           </div>
 
+          {/* Arrival */}
           <div>
             <p className="font-semibold text-foreground">{flight.destination.city} ({flight.destination.code})</p>
             <p className="text-sm text-muted-foreground">{flight.destination.name}</p>
@@ -134,9 +175,11 @@ function FlightDetailsTab({ flight }) {
   );
 }
 
+// Fare & Benefits Tab Content
 function FareBenefitsTab({ flight }) {
   return (
     <div className="p-4 md:p-6 space-y-6">
+      {/* Conditions */}
       <div className="bg-muted/30 rounded-xl p-4 space-y-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
@@ -183,36 +226,72 @@ function FareBenefitsTab({ flight }) {
   );
 }
 
+// Refund Tab Content
 function RefundTab({ flight }) {
+  const [activeSection, setActiveSection] = useState('policy');
+  const sections = [
+    { id: 'policy', label: 'Your Refund Policy' },
+    { id: 'estimation', label: 'Refund Estimation' },
+    { id: 'process', label: 'Refund Process' },
+    { id: 'other', label: 'Other Refund Info' },
+  ];
+
   return (
     <div className="p-4 md:p-6">
-       <div className="space-y-4">
-          <h4 className="font-semibold text-foreground">Refund Policy</h4>
-          <p className="text-sm text-muted-foreground">
-            {flight.isRefundable 
-              ? "This flight is refundable. Terms and conditions apply." 
-              : "This flight is non-refundable."}
-          </p>
-       </div>
+      <div className="bg-muted/30 rounded-xl p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Plane className="w-4 h-4 text-muted-foreground" />
+            <span className="font-medium text-foreground">{flight.airline.name}</span>
+          </div>
+          <span className="text-sm text-muted-foreground">{flight.flightClass || 'Economy'}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-3">
+          {flight.isRefundable ? (
+            <><Check className="w-4 h-4 text-green-500" /><span className="text-green-600 font-medium text-sm">Refundable</span></>
+          ) : (
+            <><X className="w-4 h-4 text-red-500" /><span className="text-red-600 font-medium text-sm">Non-Refundable</span></>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="md:w-56 shrink-0 space-y-2">
+          {sections.map((section) => (
+            <button key={section.id} onClick={() => setActiveSection(section.id)} className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors ${activeSection === section.id ? 'bg-primary/10 text-primary font-medium border border-primary/30' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50'}`}>
+              {section.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex-1">
+          {/* Konten sederhana untuk refund */}
+          <p className="text-sm text-muted-foreground">Refund details for section: <strong>{activeSection}</strong></p>
+        </div>
+      </div>
     </div>
   );
 }
 
+// Reschedule Tab Content
 function RescheduleTab({ flight }) {
   return (
-    <div className="p-4 md:p-6">
-       <div className="space-y-4">
-          <h4 className="font-semibold text-foreground">Reschedule Policy</h4>
-          <p className="text-sm text-muted-foreground">
-            {flight.isReschedulable 
-              ? "Reschedule is available with a fee." 
-              : "Reschedule is not available for this flight."}
-          </p>
-       </div>
+    <div className="p-4 md:p-6 space-y-6">
+      <div className={`rounded-xl p-4 ${flight.isReschedulable ? 'bg-green-50 dark:bg-green-500/10' : 'bg-red-50 dark:bg-red-500/10'}`}>
+        <div className="flex items-start gap-3">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${flight.isReschedulable ? 'bg-green-100 dark:bg-green-500/20' : 'bg-red-100 dark:bg-red-500/20'}`}>
+            {flight.isReschedulable ? <Check className="w-5 h-5 text-green-600" /> : <X className="w-5 h-5 text-red-600" />}
+          </div>
+          <div>
+            <h4 className={`font-semibold ${flight.isReschedulable ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+              {flight.isReschedulable ? 'Reschedule with fees' : 'Reschedule not available'}
+            </h4>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
+// Promos Tab Content
 function PromosTab({ flight }) {
   return (
     <div className="p-4 md:p-6 space-y-4">
@@ -236,15 +315,13 @@ function PromosTab({ flight }) {
   );
 }
 
-
-// --- MAIN COMPONENT ---
+// Main Flight Result Card Component
 export function FlightResultCard({ flight, onSelect }) {
   const [ticketOpen, setTicketOpen] = useState(false);
   const [activeFlight, setActiveFlight] = useState(null);
-
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
-  
+
   const tabs = [
     { id: 'details', label: 'Flight Details' },
     { id: 'fare', label: 'Fare & Benefits' },
@@ -255,158 +332,146 @@ export function FlightResultCard({ flight, onSelect }) {
 
   return (
     <>
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative"
-    >
-      {/* Header - Always Visible */}
-      <div className="p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center gap-4">
-          {/* Airline Info */}
-          <div className="flex items-center gap-3 md:w-44">
-            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-              {flight.airline.logo ? (
-                <img src={flight.airline.logo} alt={flight.airline.name} className="w-8 h-8 object-contain" />
-              ) : (
-                <Plane className="w-5 h-5 text-muted-foreground" />
-              )}
-            </div>
-            <div>
-              <p className="font-medium text-foreground text-sm">{flight.airline.name}</p>
-              <div className="flex items-center gap-1 mt-0.5 px-1.5 py-0.5 bg-muted rounded w-fit">
-                 <Luggage className="w-3 h-3 text-muted-foreground" />
-                 <span className="text-xs text-muted-foreground">{flight.baggage || 0}kg</span>
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
+      >
+        {/* Header - Always Visible */}
+        <div className="p-4 md:p-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            {/* Airline Info */}
+            <div className="flex items-center gap-3 md:w-44">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+                {flight.airline.logo ? (
+                  <img src={flight.airline.logo} alt={flight.airline.name} className="w-8 h-8 object-contain" />
+                ) : (
+                  <Plane className="w-5 h-5 text-muted-foreground" />
+                )}
               </div>
+              <div>
+                <p className="font-medium text-foreground text-sm">{flight.airline.name}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-muted rounded text-xs text-muted-foreground">
+                    <Luggage className="w-3 h-3" />
+                    {flight.baggage || 0}kg
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Flight Times */}
+            <div className="flex-1 flex items-center gap-4">
+              <div className="text-center">
+                <p className="text-xl font-bold text-foreground">{formatTime(flight.departureTime)}</p>
+                <p className="text-sm text-muted-foreground">{flight.origin.code}</p>
+              </div>
+              <div className="flex-1 flex flex-col items-center">
+                <p className="text-xs text-muted-foreground mb-1">
+                  {calculateDuration(flight.departureTime, flight.arrivalTime)}
+                </p>
+                <div className="w-full flex items-center gap-2">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">
+                    {flight.stops === 0 ? 'Direct' : `${flight.stops} Stop`}
+                  </span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold text-foreground">{formatTime(flight.arrivalTime)}</p>
+                <p className="text-sm text-muted-foreground">{flight.destination.code}</p>
+              </div>
+            </div>
+
+            {/* Price & Select */}
+            <div className="flex flex-col items-end gap-1 md:w-48">
+              <p className="text-2xl font-bold text-primary">{formatPrice(flight.price)}</p>
+              <p className="text-xs text-muted-foreground">/pax</p>
             </div>
           </div>
 
-          {/* Flight Times */}
-          <div className="flex-1 flex items-center gap-4">
-            <div className="text-center">
-              <p className="text-xl font-bold text-foreground">{formatTime(flight.departureTime)}</p>
-              <p className="text-sm text-muted-foreground">{flight.origin.code}</p>
+          {/* Tabs & Choose Button */}
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+            <div className="flex items-center overflow-x-auto no-scrollbar">
+              {tabs.map((tab) => (
+                <TabButton
+                  key={tab.id}
+                  active={isExpanded && activeTab === tab.id}
+                  onClick={() => {
+                    if (!isExpanded) {
+                      setIsExpanded(true);
+                    }
+                    setActiveTab(tab.id);
+                  }}
+                >
+                  <span className="flex items-center gap-1.5">
+                    {tab.label}
+                    {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
+                  </span>
+                </TabButton>
+              ))}
             </div>
-            <div className="flex-1 flex flex-col items-center">
-              <p className="text-xs text-muted-foreground mb-1">
-                {calculateDuration(flight.departureTime, flight.arrivalTime)}
-              </p>
-              <div className="w-full flex items-center gap-2">
-                <div className="flex-1 h-px bg-border" />
-                <span className="text-xs text-muted-foreground">
-                  {flight.stops === 0 ? 'Direct' : `${flight.stops} Stop`}
-                </span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-bold text-foreground">{formatTime(flight.arrivalTime)}</p>
-              <p className="text-sm text-muted-foreground">{flight.destination.code}</p>
-            </div>
-          </div>
-
-          {/* Price & Select */}
-          <div className="flex flex-col items-end gap-1 md:w-48">
-            <p className="text-2xl font-bold text-primary">{formatPrice(flight.price)}</p>
-            <p className="text-xs text-muted-foreground">/pax</p>
+            
+            <button
+              onClick={() => {
+                setActiveFlight(flight);
+                setTicketOpen(true);
+              }}
+              className="ml-4 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors shrink-0"
+            >
+              Choose
+            </button>
           </div>
         </div>
 
-        {/* Promo Tags */}
-        {flight.promos && flight.promos.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {flight.promos.slice(0, 2).map((promo, idx) => (
-              <div 
-                key={idx}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full"
-              >
-                <Gift className="w-3 h-3" />
-                {promo.shortTitle || promo.title}
+        {/* Expanded Tab Content */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="border-t border-border bg-muted/20"
+            >
+              {activeTab === 'details' && <FlightDetailsTab flight={flight} />}
+              {activeTab === 'fare' && <FareBenefitsTab flight={flight} />}
+              {activeTab === 'refund' && <RefundTab flight={flight} />}
+              {activeTab === 'reschedule' && <RescheduleTab flight={flight} />}
+              {activeTab === 'promos' && <PromosTab flight={flight} />}
+              
+              {/* Close Button */}
+              <div className="px-4 pb-4">
+                <button
+                  onClick={() => setIsExpanded(false)}
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ChevronUp className="w-4 h-4" />
+                  Hide Details
+                </button>
               </div>
-            ))}
-          </div>
-        )}
+              
+              {/* NOTE: Modal DIHAPUS DARI SINI AGAR TIDAK HILANG SAAT DETAIL DITUTUP */}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
-        {/* Tabs & Choose Button */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-          <div className="flex items-center overflow-x-auto no-scrollbar gap-2">
-            {tabs.map((tab) => (
-              <TabButton
-                key={tab.id}
-                active={isExpanded && activeTab === tab.id}
-                onClick={() => {
-                  if (!isExpanded) {
-                    setIsExpanded(true);
-                  }
-                  setActiveTab(tab.id);
-                }}
-              >
-                <span className="flex items-center gap-1.5">
-                  {tab.label}
-                  {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
-                </span>
-              </TabButton>
-            ))}
-          </div>
-          
-          <button
-            onClick={() => {
-              setActiveFlight(flight); 
-              setTicketOpen(true);    
-            }}
-            className="ml-4 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors shrink-0 shadow-lg shadow-primary/20"
-          >
-            Choose
-          </button>
-        </div>
-      </div>
-
-      {/* Expanded Tab Content (LOGIC LENGKAP) */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="border-t border-border bg-muted/20"
-          >
-            {/* INI BAGIAN YANG TADI HILANG */}
-            {activeTab === 'details' && <FlightDetailsTab flight={flight} />}
-            {activeTab === 'fare' && <FareBenefitsTab flight={flight} />}
-            {activeTab === 'refund' && <RefundTab flight={flight} />}
-            {activeTab === 'reschedule' && <RescheduleTab flight={flight} />}
-            {activeTab === 'promos' && <PromosTab flight={flight} />}
-            
-            <div className="px-4 pb-4">
-              <button
-                onClick={() => setIsExpanded(false)}
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ChevronUp className="w-4 h-4" />
-                Hide Details
-              </button>
-            </div>
-            
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-    
-    {/* MODAL BERADA DI LUAR CARD AGAR TIDAK TERSEMBUNYI */}
-    <TicketTypeModal
-      open={ticketOpen}
-      flight={flight}
-      onClose={() => {
-        setTicketOpen(false);
-        setActiveFlight(null);
-      }}
-      onSelect={(picked) => {
-        setTicketOpen(false);
-        setActiveFlight(null);
-        onSelect?.(picked); 
-      }}
-    />
+      {/* Modal dipindah ke sini (Di luar AnimatePresence) */}
+      <TicketTypeModal
+        open={ticketOpen}
+        flight={activeFlight}
+        onClose={() => {
+          setTicketOpen(false);
+          setActiveFlight(null);
+        }}
+        onSelect={(picked) => {
+          setTicketOpen(false);
+          setActiveFlight(null);
+          onSelect?.(picked);
+        }}
+      />
     </>
   );
 }
