@@ -5,6 +5,7 @@ import { AnimeNavBar } from "./components/ui/anime-navbar";
 import { FooterSection } from "./components/ui/footer-section";
 import { ThemeProvider } from "./context/theme-context";
 import { AuthProvider } from "./context/auth-context";
+import { useAuth } from "./context/auth-context";
 import { FlightSelectionProvider } from "./context/FlightSelectionContext";
 import { Home as HomeIcon, Search, Ticket, User } from "lucide-react";
 
@@ -27,6 +28,21 @@ const navItems = [
   { name: "Akun", url: "/account/settings", icon: User },
 ];
 
+function RequireAuth({ children }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return <PageLoader isLoading={true} message="Memuat akun..." />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return children;
+}
+
 function AppContent() {
   const location = useLocation();
   
@@ -47,10 +63,10 @@ function AppContent() {
             
             {/* Account Routes */}
             <Route path="/account" element={<Navigate to="/account/orders" replace />} />
-            <Route path="/account/orders" element={<Orders />} />
-            <Route path="/account/purchases" element={<PurchaseList />} />
-            <Route path="/account/settings" element={<AccountSettings />} />
-            <Route path="/account/passengers" element={<Passengers />} />
+            <Route path="/account/orders" element={<RequireAuth><Orders /></RequireAuth>} />
+            <Route path="/account/purchases" element={<RequireAuth><PurchaseList /></RequireAuth>} />
+            <Route path="/account/settings" element={<RequireAuth><AccountSettings /></RequireAuth>} />
+            <Route path="/account/passengers" element={<RequireAuth><Passengers /></RequireAuth>} />
             
             {/* Legacy routes redirect */}
             <Route path="/profile" element={<Navigate to="/account/settings" replace />} />
