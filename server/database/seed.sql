@@ -5,15 +5,15 @@
 
 -- Seed Airlines
 INSERT INTO airlines (name, code, logo_url) VALUES
-('Garuda Indonesia', 'GA', 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e4/Garuda_Indonesia_logo.svg/1200px-Garuda_Indonesia_logo.svg.png'),
-('Singapore Airlines', 'SQ', 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6b/Singapore_Airlines_Logo_2.svg/1200px-Singapore_Airlines_Logo_2.svg.png'),
-('AirAsia Indonesia', 'QZ', 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/AirAsia_New_Logo.svg/1200px-AirAsia_New_Logo.svg.png'),
-('Lion Air', 'JT', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Lion_Air_logo.svg/1200px-Lion_Air_logo.svg.png'),
-('Japan Airlines', 'JL', 'https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Japan_Airlines_Logo_%282011%29.svg/1200px-Japan_Airlines_Logo_%282011%29.svg.png'),
-('Batik Air', 'ID', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Batik_Air_logo.svg/1200px-Batik_Air_logo.svg.png'),
-('Citilink', 'QG', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Citilink_logo.svg/1200px-Citilink_logo.svg.png'),
-('AirAsia', 'AK', 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/AirAsia_New_Logo.svg/1200px-AirAsia_New_Logo.svg.png')
-ON DUPLICATE KEY UPDATE name=name;
+('Garuda Indonesia', 'GA', 'GA.png'),
+('Singapore Airlines', 'SQ', 'SQ.png'),
+('AirAsia Indonesia', 'QZ', 'QZ.png'),
+('Lion Air', 'JT', 'JT.png'),
+('Japan Airlines', 'JL', 'JL.png'),
+('Batik Air', 'ID', 'ID.png'),
+('Citilink', 'QG', 'QG.png'),
+('AirAsia', 'AK', 'AK.png')
+ON DUPLICATE KEY UPDATE name=VALUES(name), logo_url=VALUES(logo_url);
 
 -- Seed Airports
 INSERT INTO airports (code, name, city, country) VALUES

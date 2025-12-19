@@ -1,13 +1,28 @@
 import express from 'express';
 import cors from 'cors';
 import db from './config/db.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const port = 3001;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const buildAssetUrl = (req, assetPath) => {
+  if (!assetPath) return null;
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  const normalized = String(assetPath).replace(/^\/+/, '');
+  return `${baseUrl}/${normalized}`;
+};
+
 // Apply middleware
 app.use(cors());
 app.use(express.json());
+
+// Static assets (airline logos, etc.)
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Register endpoint: create user and log in
 app.post('/api/register', async (req, res) => {
@@ -203,7 +218,11 @@ app.get('/api/airlines', async (req, res) => {
     const [rows] = await db.query(
       'SELECT id, code, name, logo_url FROM airlines ORDER BY name ASC'
     );
-    res.json({ airlines: rows });
+    const airlines = rows.map((row) => ({
+      ...row,
+      logo_url: row.logo_url ? buildAssetUrl(req, `assets/airline-logo/${row.logo_url}`) : null,
+    }));
+    res.json({ airlines });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch airlines', details: error.message });
@@ -313,7 +332,7 @@ app.get('/api/flights/search', async (req, res) => {
           id: row.airline_id,
           code: row.airline_code,
           name: row.airline_name,
-          logo: row.airline_logo
+          logo: row.airline_logo ? buildAssetUrl(req, `assets/airline-logo/${row.airline_logo}`) : null
         },
         origin: {
           id: row.origin_id,
@@ -424,7 +443,7 @@ app.get('/api/flights/:id', async (req, res) => {
       airline: {
         code: row.airline_code,
         name: row.airline_name,
-        logo: row.airline_logo
+        logo: row.airline_logo ? buildAssetUrl(req, `assets/airline-logo/${row.airline_logo}`) : null
       },
       origin: {
         code: row.origin_code,
