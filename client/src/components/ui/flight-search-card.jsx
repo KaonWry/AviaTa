@@ -56,7 +56,7 @@ function SwapButton({ onClick }) {
         e.stopPropagation();
         onClick();
       }}
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[500] w-10 h-10 rounded-full bg-card border-2 border-primary/50 shadow-xl flex items-center justify-center hover:bg-primary hover:border-primary hover:scale-110 active:scale-95 transition-all duration-200 group cursor-pointer"
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-500 w-10 h-10 rounded-full bg-card border-2 border-primary/50 shadow-xl flex items-center justify-center hover:bg-primary hover:border-primary hover:scale-110 active:scale-95 transition-all duration-200 group cursor-pointer"
       aria-label="Tukar bandara keberangkatan dan tujuan"
     >
       <ArrowLeftRight className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
@@ -116,6 +116,7 @@ function ClassButton({ label, selected, onClick }) {
 function PassengerDropdown({ passengers, setPassengers, flightClass, setFlightClass }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const MotionDiv = motion.div;
 
   const totalPassengers = passengers.adults + passengers.children + passengers.infants;
   
@@ -141,12 +142,15 @@ function PassengerDropdown({ passengers, setPassengers, flightClass, setFlightCl
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-3 px-4 py-3 border border-border rounded-lg bg-background hover:border-primary/50 transition-colors group"
+        className="w-full flex items-center gap-3 px-4 py-3 border border-border rounded-lg bg-background hover:border-primary/50 transition-colors group text-left"
       >
         <Users className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-        <span className="flex-1 text-left text-sm text-foreground">
-          {totalPassengers} Penumpang, {classLabels[flightClass]}
-        </span>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs text-muted-foreground mb-0.5">Penumpang</div>
+          <div className="text-sm truncate text-foreground">
+            {totalPassengers} Penumpang, {classLabels[flightClass]}
+          </div>
+        </div>
         <ChevronDown className={cn(
           "w-4 h-4 text-muted-foreground transition-transform duration-200",
           isOpen && "rotate-180"
@@ -155,7 +159,7 @@ function PassengerDropdown({ passengers, setPassengers, flightClass, setFlightCl
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -213,7 +217,7 @@ function PassengerDropdown({ passengers, setPassengers, flightClass, setFlightCl
                 />
               </div>
             </div>
-          </motion.div>
+          </MotionDiv>
         )}
       </AnimatePresence>
     </div>

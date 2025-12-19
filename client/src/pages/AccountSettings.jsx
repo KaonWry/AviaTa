@@ -20,7 +20,9 @@ function CustomSelect({ label, value, onChange, options, placeholder }) {
 
   return (
     <div className="relative">
-      {label && <label className="block text-sm text-muted-foreground mb-1">{label}</label>}
+      <div className="block text-sm text-muted-foreground mb-1 h-5">
+        {label ? label : "\u00A0"}
+      </div>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
