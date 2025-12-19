@@ -43,7 +43,7 @@ app.post('/api/register', async (req, res) => {
     await db.query('INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)', [name, email, password]);
     // Get the new user
     const [rows] = await db.query(
-      'SELECT id, full_name, email, avatar_url, gender, birth_date, city FROM users WHERE email = ? LIMIT 1',
+      'SELECT id, full_name, email, phone, avatar_url, gender, birth_date, city FROM users WHERE email = ? LIMIT 1',
       [email]
     );
     return res.json({ success: true, user: rows[0] });
@@ -62,7 +62,7 @@ app.post('/api/login', async (req, res) => {
   try {
     // Find user by email
     const [rows] = await db.query(
-      'SELECT id, full_name, email, avatar_url, gender, birth_date, city, password FROM users WHERE email = ? LIMIT 1',
+      'SELECT id, full_name, email, phone, avatar_url, gender, birth_date, city, password FROM users WHERE email = ? LIMIT 1',
       [id]
     );
     if (rows.length === 0) {
@@ -90,7 +90,7 @@ app.get('/api/user/profile', async (req, res) => {
   }
   try {
     const [rows] = await db.query(
-      'SELECT id, full_name, email, avatar_url, gender, birth_date, city FROM users WHERE id = ? LIMIT 1',
+      'SELECT id, full_name, email, phone, avatar_url, gender, birth_date, city FROM users WHERE id = ? LIMIT 1',
       [userId]
     );
     if (rows.length === 0) {

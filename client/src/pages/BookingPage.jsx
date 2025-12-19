@@ -1,11 +1,46 @@
-import React, { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import BookingHeader from "../components/layout/BookingHeader";
 import FlightSummary from "../components/ui/FlightSummary";
 import { User, AlertTriangle, ChevronDown, Check } from "lucide-react";
+import { useAuth } from "../context/auth-context";
 
 export default function BookingPage() {
   const [hasSingleName, setHasSingleName] = useState(false);
   const [passengerSingleName, setPassengerSingleName] = useState(false);
+   const { user, isAuthenticated } = useAuth();
+
+   const initialContact = useMemo(() => {
+      const fullName = user?.full_name || user?.name || "";
+      const parts = fullName.trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) {
+         return {
+            firstName: "",
+            lastName: "",
+            phone: user?.phone || "",
+            email: user?.email || "",
+         };
+      }
+      if (parts.length === 1) {
+         return {
+            firstName: parts[0],
+            lastName: "",
+            phone: user?.phone || "",
+            email: user?.email || "",
+         };
+      }
+      return {
+         firstName: parts.slice(0, -1).join(" "),
+         lastName: parts.slice(-1).join(" "),
+         phone: user?.phone || "",
+         email: user?.email || "",
+      };
+   }, [user?.full_name, user?.name, user?.email, user?.phone]);
+
+   const [contact, setContact] = useState(initialContact);
+
+   useEffect(() => {
+      setContact(initialContact);
+   }, [initialContact]);
 
   return (
     <div className="min-h-screen bg-muted/20 font-sans pb-20">
@@ -22,15 +57,17 @@ export default function BookingPage() {
               <h2 className="text-xl font-bold text-foreground mb-4">Contact Details</h2>
               
               {/* Login Alert */}
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 flex items-start gap-4 mb-6">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shrink-0 mt-1">
-                  <User className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Logged in as</p>
-                  <p className="font-bold text-foreground text-base">Gideon Miracle Sihombing</p>
-                </div>
-              </div>
+                     {isAuthenticated && (
+                        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 flex items-start gap-4 mb-6">
+                           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shrink-0 mt-1">
+                              <User className="w-5 h-5" />
+                           </div>
+                           <div>
+                              <p className="text-sm text-muted-foreground">Logged in as</p>
+                              <p className="font-bold text-foreground text-base">{user?.full_name || user?.name}</p>
+                           </div>
+                        </div>
+                     )}
 
               {/* Form Input */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -38,7 +75,8 @@ export default function BookingPage() {
                   <label className="text-xs font-semibold text-muted-foreground">First / Given Name & Middle Name<span className="text-red-500">*</span></label>
                   <input 
                     type="text" 
-                    defaultValue="Gideon Miracle" 
+                              value={contact.firstName}
+                              onChange={(e) => setContact((prev) => ({ ...prev, firstName: e.target.value }))}
                     className="w-full p-2.5 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-foreground font-medium transition-all"
                   />
                 </div>
@@ -46,7 +84,8 @@ export default function BookingPage() {
                   <label className="text-xs font-semibold text-muted-foreground">Family Name / Last Name<span className="text-red-500">*</span></label>
                   <input 
                     type="text" 
-                    defaultValue="Sihombing" 
+                              value={contact.lastName}
+                              onChange={(e) => setContact((prev) => ({ ...prev, lastName: e.target.value }))}
                     disabled={hasSingleName}
                     className={`w-full p-2.5 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-foreground font-medium transition-all ${hasSingleName ? 'opacity-50 cursor-not-allowed' : ''}`}
                   />
@@ -67,14 +106,21 @@ export default function BookingPage() {
                     <div className="flex items-center gap-1 px-3 border border-r-0 border-input rounded-l-lg bg-muted">
                        <span className="text-sm font-bold text-muted-foreground">+62</span>
                     </div>
-                    <input type="text" className="flex-1 p-2.5 bg-background border border-input rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary font-medium" placeholder="812345678" />
+                              <input
+                                 type="text"
+                                 className="flex-1 p-2.5 bg-background border border-input rounded-r-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary font-medium"
+                                 placeholder="812345678"
+                                 value={contact.phone}
+                                 onChange={(e) => setContact((prev) => ({ ...prev, phone: e.target.value }))}
+                              />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-muted-foreground">Email<span className="text-red-500">*</span></label>
                   <input 
                     type="email" 
-                    defaultValue="gideonms99@gmail.com" 
+                              value={contact.email}
+                              onChange={(e) => setContact((prev) => ({ ...prev, email: e.target.value }))}
                     className="w-full p-2.5 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-foreground font-medium"
                   />
                 </div>
