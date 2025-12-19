@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS flights (
     reschedule_fee DECIMAL(12, 2) DEFAULT 150000,
     status ENUM('scheduled', 'delayed', 'cancelled', 'completed') DEFAULT 'scheduled',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    airnavradar_id VARCHAR(50) NULL,
     FOREIGN KEY (airline_id) REFERENCES airlines(id) ON DELETE CASCADE,
     FOREIGN KEY (origin_airport_id) REFERENCES airports(id) ON DELETE CASCADE,
     FOREIGN KEY (destination_airport_id) REFERENCES airports(id) ON DELETE CASCADE

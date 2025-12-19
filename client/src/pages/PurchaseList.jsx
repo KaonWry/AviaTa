@@ -158,28 +158,49 @@ function EmptyPurchases() {
 
 // Purchase Item Card (for when there are purchases)
 function PurchaseCard({ purchase }) {
+  const airnavradarId = purchase?.airnavradar_id ?? purchase?.meta?.airnavradar_id;
+
   return (
-    <div className="flex items-center justify-between p-4 border-b border-border last:border-b-0">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Ticket className="w-6 h-6 text-primary" />
+    <div className="p-4 border-b border-border last:border-b-0">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Ticket className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h4 className="font-medium text-foreground">{purchase.title}</h4>
+            <p className="text-sm text-muted-foreground">{purchase.date}</p>
+          </div>
         </div>
-        <div>
-          <h4 className="font-medium text-foreground">{purchase.title}</h4>
-          <p className="text-sm text-muted-foreground">{purchase.date}</p>
+        <div className="text-right">
+          <p className="font-semibold text-foreground">Rp {purchase.amount.toLocaleString('id-ID')}</p>
+          <span className={cn(
+            "text-xs px-2 py-0.5 rounded-full",
+            purchase.status === "success" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+            purchase.status === "pending" && "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+            purchase.status === "failed" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+          )}>
+            {purchase.status === "success" ? "Berhasil" : purchase.status === "pending" ? "Pending" : "Gagal"}
+          </span>
         </div>
       </div>
-      <div className="text-right">
-        <p className="font-semibold text-foreground">Rp {purchase.amount.toLocaleString('id-ID')}</p>
-        <span className={cn(
-          "text-xs px-2 py-0.5 rounded-full",
-          purchase.status === "success" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-          purchase.status === "pending" && "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-          purchase.status === "failed" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-        )}>
-          {purchase.status === "success" ? "Berhasil" : purchase.status === "pending" ? "Pending" : "Gagal"}
-        </span>
-      </div>
+
+      {/* Flight tracking iframe (testing) */}
+      {airnavradarId ? (
+        <div className="mt-4 w-full rounded-lg border border-border overflow-hidden bg-background">
+          <iframe
+            title="Flight tracking (test)"
+            frameBorder="0"
+            scrolling="no"
+            marginHeight="0"
+            marginWidth="0"
+            width="100%"
+            height={400}
+            src={`https://www.airnavradar.com/?widget=1&z=7&fid=${encodeURIComponent(String(airnavradarId))}`}
+            style={{ display: "block" }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

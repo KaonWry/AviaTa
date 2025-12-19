@@ -727,6 +727,7 @@ app.get('/api/user/purchases', async (req, res) => {
         orig.code AS origin_code,
         dest.city AS destination_city,
         dest.code AS destination_code,
+        f.airnavradar_id,
         t.payment_status
       FROM bookings b
       JOIN flights f ON f.id = b.flight_id
@@ -746,6 +747,7 @@ app.get('/api/user/purchases', async (req, res) => {
       amount: Number(r.total_price || 0),
       date: r.booking_date,
       title: `${r.origin_city} → ${r.destination_city}`,
+      airnavradar_id: r.airnavradar_id,
       meta: {
         airline: {
           name: r.airline_name,
