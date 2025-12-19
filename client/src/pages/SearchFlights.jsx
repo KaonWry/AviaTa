@@ -60,6 +60,27 @@ const amenityIcons = {
   entertainment: Zap
 };
 
+function matchesDepartureTimeFilter(flight, selectedRanges) {
+  if (!Array.isArray(selectedRanges) || selectedRanges.length === 0) return true;
+
+  const departure = new Date(flight?.departureTime);
+  if (Number.isNaN(departure.getTime())) return false;
+
+  const hour = departure.getHours();
+  const ranges = {
+    morning: [6, 12],
+    afternoon: [12, 18],
+    evening: [18, 24],
+  };
+
+  return selectedRanges.some((key) => {
+    const range = ranges[key];
+    if (!range) return false;
+    const [start, end] = range;
+    return hour >= start && hour < end;
+  });
+}
+
 // Filter Sidebar Component
 function FilterSidebar({ filters, setFilters, airlines }) {
   const [expandedSections, setExpandedSections] = useState({
@@ -588,9 +609,12 @@ export function SearchFlights() {
   // Filter and sort flights
   const filteredFlights = flights
     .filter(flight => {
-      if (filters.maxPrice && flight.price > filters.maxPrice) return false;
+      const maxPrice = filters.maxPrice == null ? null : Number(filters.maxPrice);
+      const flightPrice = Number(flight?.price ?? flight?.base_price ?? 0);
+      if (Number.isFinite(maxPrice) && flightPrice > maxPrice) return false;
       if (filters.airlines?.length && !filters.airlines.includes(flight.airline.code)) return false;
       if (filters.directOnly && flight.stops > 0) return false;
+      if (!matchesDepartureTimeFilter(flight, filters.departureTime)) return false;
       return true;
     })
     .sort((a, b) => {
