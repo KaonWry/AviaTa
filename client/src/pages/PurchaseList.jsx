@@ -22,7 +22,6 @@ function DateFilterButtons({ activeFilter, setActiveFilter }) {
     { id: "90days", label: "Past 90 Days" },
     { id: "current", label: currentMonthLabel },
     { id: "prev", label: prevMonthLabel },
-    { id: "custom", label: "Customize date" },
   ];
 
   return (
