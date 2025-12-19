@@ -13,13 +13,6 @@ import { cn } from "../../lib/utils";
 import { useAuth } from "../../context/auth-context";
 
 const menuItems = [
-  { 
-    section: "main",
-    items: [
-      { name: "0", url: "/account/points", icon: Award, isPoints: true },
-      { name: "My Cards", url: "/account/cards", icon: CreditCard },
-    ]
-  },
   {
     section: "orders",
     items: [
@@ -77,14 +70,6 @@ export function AccountSidebar({ className }) {
           </div>
         </div>
         
-        {/* Priority Badge */}
-        <button className="mt-4 w-full flex items-center justify-between px-4 py-2.5 bg-primary rounded-lg text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-          <div className="flex items-center gap-2">
-            <Award className="w-4 h-4" />
-            <span>You&apos;re our <strong>Bronze Priority</strong></span>
-          </div>
-          <ChevronRight className="w-4 h-4" />
-        </button>
       </div>
 
       {/* Navigation Menu */}
