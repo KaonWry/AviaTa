@@ -119,7 +119,7 @@ function AboutUsSection({ className }) {
     },
     {
       icon: "compare",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      avatar: "https://cdn.animeprofile.com/pfps/f906d6cc6b354b6e3eee56e7e22efd63_1.png",
       name: "Gideon",
       role: "Tim AviaTa",
       review: "AviaTa membantu kamu mengelola tiket dan memantau perjalanan dalam satu tempat.",
