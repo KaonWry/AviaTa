@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/auth-context";
-import FlightSummary from "../components/flights/FlightSummary";
+import FlightSummary from "../components/ui/FlightSummary";
 
 export default function CheckoutPage() {
   const { user } = useAuth();

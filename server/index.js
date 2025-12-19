@@ -154,14 +154,14 @@ app.get('/api/test-db', async (req, res) => {
 
 // Update user profile endpoint (by id)
 app.put('/api/user/profile', async (req, res) => {
-  const { id, full_name, gender, birth_date, city } = req.body;
+  const { id, full_name, gender, birth_date, city, phone, email } = req.body;
   if (!id) {
     return res.status(400).json({ error: 'User id is required.' });
   }
   try {
     const [result] = await db.query(
-      'UPDATE users SET full_name = ?, gender = ?, birth_date = ?, city = ? WHERE id = ?',
-      [full_name, gender, birth_date, city, id]
+      'UPDATE users SET full_name = COALESCE(?, full_name), gender = COALESCE(?, gender), birth_date = COALESCE(?, birth_date), city = COALESCE(?, city), phone = COALESCE(?, phone), email = COALESCE(?, email) WHERE id = ?',
+      [full_name ?? null, gender ?? null, birth_date ?? null, city ?? null, phone ?? null, email ?? null, id]
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'User not found.' });
@@ -169,6 +169,9 @@ app.put('/api/user/profile', async (req, res) => {
     return res.json({ success: true });
   } catch (error) {
     console.error(error);
+    if (error?.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: 'Email sudah terdaftar.' });
+    }
     return res.status(500).json({ error: 'Server error', details: error.message });
   }
 });
