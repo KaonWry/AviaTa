@@ -276,7 +276,7 @@ function PersonalDataForm({ user }) {
 }
 
 // Contact List Component (for Email & Phone)
-function ContactList({ title, subtitle, items, onAdd, buttonLabel }) {
+function ContactList({ title, subtitle, items, onAdd, buttonLabel, children }) {
   return (
     <div className="bg-card border border-border rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
@@ -307,6 +307,8 @@ function ContactList({ title, subtitle, items, onAdd, buttonLabel }) {
           ))}
         </div>
       )}
+
+      {children}
     </div>
   );
 }
@@ -351,7 +353,26 @@ function ConnectedAccounts() {
 
 // Main Account Settings Page
 export function AccountSettings() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, updateUser } = useAuth();
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [emailValue, setEmailValue] = useState(user?.email || "");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [phoneValue, setPhoneValue] = useState(user?.phone || "");
+  const [phoneSaving, setPhoneSaving] = useState(false);
+  const [phoneSuccess, setPhoneSuccess] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
+
+  useEffect(() => {
+    setPhoneValue(user?.phone || "");
+  }, [user?.phone]);
+
+  useEffect(() => {
+    setEmailValue(user?.email || "");
+  }, [user?.email]);
 
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
@@ -359,10 +380,103 @@ export function AccountSettings() {
   }
 
   const emails = [
-    { value: user?.email || "user@example.com", isPrimary: true }
+    { value: user?.email || "", isPrimary: true }
   ];
 
-  const phones = [];
+  const phones = user?.phone ? [{ value: user.phone, isPrimary: true }] : [];
+
+  const handleStartEmailEdit = () => {
+    setEmailError("");
+    setEmailSuccess(false);
+    setEmailValue(user?.email || "");
+    setIsEditingEmail(true);
+  };
+
+  const handleSaveEmail = async (e) => {
+    e.preventDefault();
+    if (!user?.id) return;
+
+    setEmailSaving(true);
+    setEmailError("");
+    setEmailSuccess(false);
+    try {
+      const nextEmail = emailValue.trim();
+      const res = await fetch("http://localhost:3001/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: user.id,
+          email: nextEmail,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setEmailError(data.error || "Gagal menyimpan email.");
+        return;
+      }
+
+      const profileRes = await fetch(
+        `http://localhost:3001/api/user/profile?id=${encodeURIComponent(String(user.id))}`
+      );
+      const profileData = await profileRes.json();
+      if (profileRes.ok && profileData.success) {
+        updateUser(profileData.user);
+      }
+
+      setEmailSuccess(true);
+      setIsEditingEmail(false);
+    } catch {
+      setEmailError("Gagal menyimpan email.");
+    } finally {
+      setEmailSaving(false);
+    }
+  };
+
+  const handleStartPhoneEdit = () => {
+    setPhoneError("");
+    setPhoneSuccess(false);
+    setPhoneValue(user?.phone || "");
+    setIsEditingPhone(true);
+  };
+
+  const handleSavePhone = async (e) => {
+    e.preventDefault();
+    if (!user?.id) return;
+
+    setPhoneSaving(true);
+    setPhoneError("");
+    setPhoneSuccess(false);
+    try {
+      const res = await fetch("http://localhost:3001/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: user.id,
+          phone: phoneValue.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setPhoneError(data.error || "Gagal menyimpan nomor handphone.");
+        return;
+      }
+
+      const profileRes = await fetch(
+        `http://localhost:3001/api/user/profile?id=${encodeURIComponent(String(user.id))}`
+      );
+      const profileData = await profileRes.json();
+      if (profileRes.ok && profileData.success) {
+        updateUser(profileData.user);
+      }
+
+      setPhoneSuccess(true);
+      setIsEditingPhone(false);
+    } catch {
+      setPhoneError("Gagal menyimpan nomor handphone.");
+    } finally {
+      setPhoneSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted/30 pt-24 pb-8">
@@ -390,19 +504,114 @@ export function AccountSettings() {
             
             <ContactList
               title="Email"
-              subtitle="Anda bisa mendaftarkan maks. 3 email"
+              subtitle="Untuk saat ini, 1 email per akun"
               items={emails}
-              onAdd={() => {}}
-              buttonLabel="Tambah Email"
-            />
+              onAdd={handleStartEmailEdit}
+              buttonLabel={user?.email ? "Ubah Email" : "Tambah Email"}
+            >
+              {isEditingEmail && (
+                <form onSubmit={handleSaveEmail} className="border-t border-border pt-4 mt-4 space-y-3">
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={emailValue}
+                      onChange={(e) => setEmailValue(e.target.value)}
+                      placeholder="nama@email.com"
+                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      className="px-6 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => {
+                        setIsEditingEmail(false);
+                        setEmailError("");
+                        setEmailSuccess(false);
+                        setEmailValue(user?.email || "");
+                      }}
+                      disabled={emailSaving}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors"
+                      disabled={emailSaving}
+                    >
+                      {emailSaving ? "Menyimpan..." : "Simpan"}
+                    </button>
+                  </div>
+
+                  {emailError && <div className="text-red-500 text-sm">{emailError}</div>}
+                </form>
+              )}
+
+              {emailSuccess && !isEditingEmail && (
+                <div className="border-t border-border pt-4 mt-4 text-green-600 text-sm">
+                  Email berhasil disimpan.
+                </div>
+              )}
+            </ContactList>
             
             <ContactList
               title="No. Handphone"
               subtitle="Anda bisa mendaftarkan maks. 3 no handphone"
               items={phones}
-              onAdd={() => {}}
-              buttonLabel="Tambah No. Handphone"
-            />
+              onAdd={handleStartPhoneEdit}
+              buttonLabel={user?.phone ? "Ubah No. Handphone" : "Tambah No. Handphone"}
+            >
+              {isEditingPhone && (
+                <form onSubmit={handleSavePhone} className="border-t border-border pt-4 mt-4 space-y-3">
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1">No. Handphone</label>
+                    <input
+                      type="tel"
+                      value={phoneValue}
+                      onChange={(e) => setPhoneValue(e.target.value)}
+                      placeholder="Contoh: 081234567890"
+                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Untuk saat ini, 1 nomor per akun.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      className="px-6 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => {
+                        setIsEditingPhone(false);
+                        setPhoneError("");
+                        setPhoneSuccess(false);
+                        setPhoneValue(user?.phone || "");
+                      }}
+                      disabled={phoneSaving}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors"
+                      disabled={phoneSaving}
+                    >
+                      {phoneSaving ? "Menyimpan..." : "Simpan"}
+                    </button>
+                  </div>
+
+                  {phoneError && <div className="text-red-500 text-sm">{phoneError}</div>}
+                </form>
+              )}
+
+              {phoneSuccess && !isEditingPhone && (
+                <div className="border-t border-border pt-4 mt-4 text-green-600 text-sm">
+                  Nomor handphone berhasil disimpan.
+                </div>
+              )}
+            </ContactList>
             
             <ConnectedAccounts />
           </div>
