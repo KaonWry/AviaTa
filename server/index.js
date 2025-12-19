@@ -17,6 +17,44 @@ const buildAssetUrl = (req, assetPath) => {
   return `${baseUrl}/${normalized}`;
 };
 
+const resolveDestinationCardImageFilename = (title) => {
+  if (!title) return null;
+
+  // Prefer destination part after arrow ("Jakarta → Bali" => "Bali")
+  const raw = String(title);
+  const arrowMatch = raw.split(/→|->/);
+  const candidate = (arrowMatch.length > 1 ? arrowMatch[arrowMatch.length - 1] : raw).trim();
+
+  // Remove parentheses ("Tokyo (NRT)" => "Tokyo")
+  const city = candidate.replace(/\s*\([^)]*\)\s*/g, " ").trim().toLowerCase();
+
+  // Map known destinations to filenames in server/assets/cards
+  const map = {
+    bali: 'bali.jpg',
+    jakarta: 'jakarta.jpg',
+    singapore: 'singapore.jpg',
+    surabaya: 'surabaya.webp',
+    'kuala lumpur': 'kuala lumpur.jpg',
+    tokyo: 'tokyo.png',
+    osaka: 'osaka.png',
+    penang: 'penang.webp',
+    pyongyang: 'pyongyang.jpg',
+  };
+
+  return map[city] || null;
+};
+
+const withDestinationCardImage = (req, destinations) => {
+  if (!Array.isArray(destinations)) return [];
+  return destinations.map((d) => {
+    const filename = resolveDestinationCardImageFilename(d?.title);
+    return {
+      ...d,
+      image: filename ? buildAssetUrl(req, `assets/cards/${filename}`) : null,
+    };
+  });
+};
+
 // Apply middleware
 app.use(cors());
 app.use(express.json());
@@ -185,14 +223,14 @@ const COUNTRY_DESTINATIONS = {
 
 // API endpoint for popular destinations
 app.get('/api/popular-destinations', (req, res) => {
-  res.json({ destinations: POPULAR_DESTINATIONS });
+  res.json({ destinations: withDestinationCardImage(req, POPULAR_DESTINATIONS) });
 });
 
 // API endpoint for country destinations
 app.get('/api/country-destinations/:country', (req, res) => {
   const country = req.params.country;
   const items = COUNTRY_DESTINATIONS[country] || [];
-  res.json({ destinations: items });
+  res.json({ destinations: withDestinationCardImage(req, items) });
 });
 
 // =============================================

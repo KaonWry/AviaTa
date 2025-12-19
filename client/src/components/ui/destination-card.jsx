@@ -1,41 +1,48 @@
 import { cn } from "../../lib/utils";
 import { motion } from "framer-motion";
+import { useState } from "react";
+
+const MotionDiv = motion.div;
+const MotionArticle = motion.article;
 
 // Animated Skeleton Card for loading state
 function SkeletonCard({ index }) {
   return (
-    <motion.div
+    <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.3 }}
       className="bg-white rounded-xl border border-[#E0E0E0] overflow-hidden"
     >
       {/* Image skeleton with shimmer effect */}
-      <motion.div 
+      <MotionDiv 
         className="h-[120px] bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%]"
         animate={{ backgroundPosition: ["100% 0", "-100% 0"] }}
         transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
       />
       <div className="p-4 space-y-2">
-        <motion.div 
+        <MotionDiv 
           className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] rounded w-3/4"
           animate={{ backgroundPosition: ["100% 0", "-100% 0"] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.1 }}
         />
-        <motion.div 
+        <MotionDiv 
           className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] rounded w-1/2"
           animate={{ backgroundPosition: ["100% 0", "-100% 0"] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.2 }}
         />
       </div>
-    </motion.div>
+    </MotionDiv>
   );
 }
 
 // Destination Card with Hover Effects - Optimized for AviaTa Flight Booking
 export function DestinationCard({ title, description, image, index = 0 }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgOk, setImgOk] = useState(true);
+
   return (
-    <motion.article
+    <MotionArticle
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
@@ -51,28 +58,37 @@ export function DestinationCard({ title, description, image, index = 0 }) {
       
       {/* Image Container */}
       <div className="relative h-[120px] overflow-hidden">
-        {image ? (
+        {/* Always render a nice placeholder behind the image */}
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#8FABD4] to-[#4A70A9] flex items-center justify-center">
+          <svg 
+            className="w-10 h-10 text-white/60" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" 
+            />
+          </svg>
+        </div>
+
+        {image && imgOk && (
           <img 
             src={image} 
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110"
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgOk(false)}
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110",
+              "transition-opacity duration-300",
+              imgLoaded ? "opacity-100" : "opacity-0"
+            )}
           />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#8FABD4] to-[#4A70A9] flex items-center justify-center">
-            <svg 
-              className="w-10 h-10 text-white/60" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={1.5} 
-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" 
-              />
-            </svg>
-          </div>
         )}
         
         {/* Decorative Corner */}
@@ -97,7 +113,7 @@ export function DestinationCard({ title, description, image, index = 0 }) {
 
       {/* Bottom Action Hint */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4A70A9] to-[#8FABD4] transform scale-x-0 group-hover/card:scale-x-100 transition-transform duration-300 origin-left" />
-    </motion.article>
+    </MotionArticle>
   );
 }
 
@@ -105,7 +121,7 @@ export function DestinationCard({ title, description, image, index = 0 }) {
 export function DestinationGrid({ destinations, loading, emptyMessage }) {
   if (loading) {
     return (
-      <motion.div 
+      <MotionDiv 
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -114,24 +130,24 @@ export function DestinationGrid({ destinations, loading, emptyMessage }) {
         {[...Array(4)].map((_, idx) => (
           <SkeletonCard key={idx} index={idx} />
         ))}
-      </motion.div>
+      </MotionDiv>
     );
   }
 
   if (!destinations || destinations.length === 0) {
     return (
-      <motion.div 
+      <MotionDiv 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="col-span-4 text-center py-10 text-sm text-gray-500"
       >
         {emptyMessage || "Tidak ada destinasi tersedia."}
-      </motion.div>
+      </MotionDiv>
     );
   }
 
   return (
-    <motion.div 
+    <MotionDiv 
       className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -146,7 +162,7 @@ export function DestinationGrid({ destinations, loading, emptyMessage }) {
           index={idx}
         />
       ))}
-    </motion.div>
+    </MotionDiv>
   );
 }
 
