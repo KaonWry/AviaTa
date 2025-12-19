@@ -33,7 +33,6 @@ function buildTicketOptions(flight) {
       benefits: [
         { text: "Cabin baggage 7 kg", included: true },
         { text: "Checked baggage 20 kg", included: true },
-        { text: "Reschedule with fees", included: true },
         { text: "Non-refundable", included: false, alert: true },
       ]
     },
@@ -48,7 +47,6 @@ function buildTicketOptions(flight) {
       benefits: [
         { text: "Cabin baggage 7 kg", included: true },
         { text: "Checked baggage 20 kg", included: true },
-        { text: "Reschedule with fees", included: true },
         { text: "Refundable", included: true, highlight: true },
       ]
     },

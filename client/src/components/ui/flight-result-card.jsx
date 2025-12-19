@@ -241,7 +241,6 @@ export function FlightResultCard({ flight, onSelect }) {
     { id: 'details', label: 'Flight Details' },
     { id: 'fare', label: 'Fare & Benefits' },
     { id: 'refund', label: 'Refund' },
-    { id: 'reschedule', label: 'Reschedule' },
     { id: 'promos', label: 'Promos', icon: Gift },
   ];
 
