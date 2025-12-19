@@ -168,13 +168,6 @@ function FareBenefitsTab({ flight }) {
               <><X className="w-4 h-4 text-red-500" /><span className="text-red-600 font-medium">Non-Refundable</span></>
             )}
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            {flight?.isReschedulable ? (
-              <><RefreshCw className="w-4 h-4 text-green-500" /><span className="text-green-600 font-medium">Reschedule Available</span></>
-            ) : (
-              <><RefreshCw className="w-4 h-4 text-red-500" /><span className="text-red-600 font-medium">No Reschedule</span></>
-            )}
-          </div>
         </div>
       </div>
     </div>
