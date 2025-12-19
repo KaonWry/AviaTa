@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
   Ticket,
   SlidersHorizontal,
@@ -54,13 +55,14 @@ function DateFilterButtons({ activeFilter, setActiveFilter }) {
 function CustomDateModal({ isOpen, onClose, onApply }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const MotionDiv = motion.div;
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="relative bg-card rounded-xl p-6 w-full max-w-sm mx-4 shadow-xl"
@@ -101,7 +103,7 @@ function CustomDateModal({ isOpen, onClose, onApply }) {
             Terapkan
           </button>
         </div>
-      </motion.div>
+      </MotionDiv>
     </div>
   );
 }
@@ -114,7 +116,7 @@ function EmptyIllustration() {
       <div className="absolute inset-0 bg-muted/50 rounded-lg" />
       
       {/* Cash register */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-16 bg-gradient-to-b from-gray-300 to-gray-400 rounded-lg shadow-md">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-16 bg-linear-to-b from-gray-300 to-gray-400 rounded-lg shadow-md">
         {/* Screen */}
         <div className="absolute top-1 left-1/2 -translate-x-1/2 w-16 h-6 bg-gray-200 rounded-sm" />
         {/* Buttons */}
@@ -184,17 +186,88 @@ function PurchaseCard({ purchase }) {
 
 // Main Purchase List Page
 export function PurchaseList() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [activeFilter, setActiveFilter] = useState("90days");
   const [showCustomDate, setShowCustomDate] = useState(false);
+  const [customRange, setCustomRange] = useState({ start: "", end: "" });
+
+  const [purchases, setPurchases] = useState([]);
+  const [fetching, setFetching] = useState(false);
+  const [fetchError, setFetchError] = useState("");
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let isMounted = true;
+    const kickoff = setTimeout(() => {
+      if (!isMounted) return;
+      setFetching(true);
+      setFetchError("");
+    }, 0);
+
+    fetch(`http://localhost:3001/api/user/purchases?id=${encodeURIComponent(String(user.id))}`)
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Gagal memuat purchase list.");
+        }
+        if (isMounted) setPurchases(Array.isArray(data.purchases) ? data.purchases : []);
+      })
+      .catch((err) => {
+        if (isMounted) setFetchError(err?.message || "Gagal memuat purchase list.");
+      })
+      .finally(() => {
+        if (isMounted) setFetching(false);
+      });
+
+    return () => {
+      isMounted = false;
+      clearTimeout(kickoff);
+    };
+  }, [user?.id]);
+
+  const filteredPurchases = useMemo(() => {
+    const now = new Date();
+
+    const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
+    const endOfMonth = (d) => new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    const withinRange = (dateObj, start, end) => {
+      if (!dateObj || Number.isNaN(dateObj.getTime())) return false;
+      if (start && dateObj < start) return false;
+      if (end && dateObj > end) return false;
+      return true;
+    };
+
+    let start = null;
+    let end = null;
+    if (activeFilter === "90days") {
+      start = new Date(now);
+      start.setDate(start.getDate() - 90);
+      end = now;
+    } else if (activeFilter === "current") {
+      start = startOfMonth(now);
+      end = endOfMonth(now);
+    } else if (activeFilter === "prev") {
+      const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      start = startOfMonth(prev);
+      end = endOfMonth(prev);
+    } else if (activeFilter === "custom" && customRange.start && customRange.end) {
+      start = new Date(customRange.start);
+      end = new Date(customRange.end);
+      end.setHours(23, 59, 59, 999);
+    }
+
+    if (!start && !end) return purchases;
+    return purchases.filter((p) => {
+      const d = new Date(p.date);
+      return withinRange(d, start, end);
+    });
+  }, [activeFilter, purchases, customRange.end, customRange.start]);
 
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-
-  // Mock purchases data - empty for now
-  const purchases = [];
 
   const handleFilterChange = (filterId) => {
     if (filterId === "custom") {
@@ -232,9 +305,17 @@ export function PurchaseList() {
 
             {/* Purchases List */}
             <div className="bg-card border border-border rounded-xl p-6">
-              {purchases.length > 0 ? (
+              {fetchError && (
+                <div className="mb-4 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl text-red-700 dark:text-red-400">
+                  {fetchError}
+                </div>
+              )}
+
+              {fetching ? (
+                <div className="text-sm text-muted-foreground">Memuat...</div>
+              ) : filteredPurchases.length > 0 ? (
                 <div>
-                  {purchases.map((purchase) => (
+                  {filteredPurchases.map((purchase) => (
                     <PurchaseCard key={purchase.id} purchase={purchase} />
                   ))}
                 </div>
@@ -251,7 +332,7 @@ export function PurchaseList() {
         isOpen={showCustomDate}
         onClose={() => setShowCustomDate(false)}
         onApply={(start, end) => {
-          console.log("Custom date range:", start, end);
+          setCustomRange({ start, end });
           setActiveFilter("custom");
         }}
       />

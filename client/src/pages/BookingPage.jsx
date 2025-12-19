@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BookingHeader from "../components/layout/BookingHeader";
 import FlightSummary from "../components/ui/FlightSummary";
 import { User, AlertTriangle, ChevronDown, Check } from "lucide-react";
 import { useAuth } from "../context/auth-context";
 
 export default function BookingPage() {
+   const navigate = useNavigate();
   const [hasSingleName, setHasSingleName] = useState(false);
   const [passengerSingleName, setPassengerSingleName] = useState(false);
    const { user, isAuthenticated } = useAuth();
@@ -201,7 +203,11 @@ export default function BookingPage() {
 
             {/* TOMBOL CONTINUE (Pakai Warna Primary AviaTa) */}
             <div className="flex justify-end pt-4">
-               <button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-10 rounded-full shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.02] active:scale-95 text-lg">
+               <button
+                  type="button"
+                  onClick={() => navigate('/checkout')}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-10 rounded-full shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.02] active:scale-95 text-lg"
+               >
                   Continue to Payment
                </button>
             </div>

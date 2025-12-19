@@ -26,7 +26,16 @@ export function AuthProvider({ children, storageKey = "aviata-auth" }) {
         const stored = localStorage.getItem(storageKey);
         if (stored) {
           const userData = JSON.parse(stored);
-          setUser(userData);
+          const rawId = userData?.id;
+          const numericId = Number.parseInt(String(rawId), 10);
+          // Older app versions sometimes stored `id` as an email string.
+          // This app now requires numeric user ids for profile/booking APIs.
+          if (Number.isFinite(numericId) && String(rawId).trim() !== "") {
+            setUser({ ...userData, id: numericId });
+          } else {
+            localStorage.removeItem(storageKey);
+            setUser(null);
+          }
         }
       } catch (error) {
         console.error("Error checking auth:", error);

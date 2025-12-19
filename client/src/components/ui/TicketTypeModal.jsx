@@ -9,7 +9,7 @@ function buildTicketOptions(flight) {
   const base = Number(flight?.price || 0);
   return [
     {
-      id: "eco_basic",
+      ticketTypeId: "eco_basic",
       tag: "Basic",
       labelColor: "text-gray-700",
       price: base,
@@ -22,7 +22,7 @@ function buildTicketOptions(flight) {
       ]
     },
     {
-      id: "eco_value",
+      ticketTypeId: "eco_value",
       tag: "Best Value",
       labelColor: "text-blue-600",
       price: base + 185000,
@@ -37,7 +37,7 @@ function buildTicketOptions(flight) {
       ]
     },
     {
-      id: "eco_flexi",
+      ticketTypeId: "eco_flexi",
       tag: "Recommended",
       labelColor: "text-purple-600",
       price: base + 450000,
@@ -135,7 +135,7 @@ export default function TicketTypeModal({ open, onClose, flight, onSelect }) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-10">
                 {options.map((opt) => (
                   <div 
-                    key={opt.id} 
+                    key={opt.ticketTypeId} 
                     className={`
                       relative flex flex-col bg-card rounded-xl border-2 transition-all duration-200 
                       ${opt.recommended ? "border-blue-500 shadow-lg shadow-blue-500/10" : "border-border hover:border-primary/50"}
@@ -183,7 +183,7 @@ export default function TicketTypeModal({ open, onClose, flight, onSelect }) {
                     {/* Footer Button (SEMUA SAMA WARNANYA SEKARANG) */}
                     <div className="p-4 pt-0 mt-auto">
                       <button
-                        onClick={() => onSelect({...flight, ...opt})}
+                        onClick={() => onSelect({ ...flight, ...opt })}
                         className="w-full py-2.5 rounded-full font-bold text-sm transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20"
                       >
                         Select

@@ -3,6 +3,7 @@ import cors from 'cors';
 import db from './config/db.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
 const app = express();
 const port = 3001;
@@ -550,4 +551,218 @@ app.get('/api/promos', async (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
+});
+
+const generateCode = (length) => {
+  // URL-safe, uppercase-ish alphanumeric
+  const raw = crypto.randomBytes(Math.ceil(length * 0.75)).toString('base64');
+  return raw
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase()
+    .slice(0, length)
+    .padEnd(length, 'X');
+};
+
+const resolveFlightClassId = async (conn, flightClassId, flightClassCode) => {
+  const parsed = Number.parseInt(String(flightClassId), 10);
+  if (Number.isFinite(parsed)) {
+    const [rows] = await conn.query('SELECT id FROM flight_classes WHERE id = ? LIMIT 1', [parsed]);
+    if (rows.length > 0) return rows[0].id;
+  }
+
+  if (flightClassCode) {
+    const [rows] = await conn.query('SELECT id FROM flight_classes WHERE code = ? LIMIT 1', [String(flightClassCode)]);
+    if (rows.length > 0) return rows[0].id;
+  }
+
+  const [fallback] = await conn.query('SELECT id FROM flight_classes ORDER BY id ASC LIMIT 1');
+  return fallback.length > 0 ? fallback[0].id : null;
+};
+
+// Finalize purchase: create booking + transaction (payment skipped)
+app.post('/api/purchases/finalize', async (req, res) => {
+  const {
+    user_id,
+    userId,
+    flight_id,
+    flightId,
+    flight_class_id,
+    flightClassId,
+    flight_class_code,
+    flightClassCode,
+    total_passengers,
+    totalPassengers,
+    trip_type,
+    tripType,
+  } = req.body;
+
+  const resolvedUserId = Number.parseInt(String(user_id ?? userId), 10);
+  const resolvedFlightId = Number.parseInt(String(flight_id ?? flightId), 10);
+  const resolvedTotalPassengers = Math.max(
+    1,
+    Number.parseInt(String(total_passengers ?? totalPassengers ?? 1), 10) || 1
+  );
+
+  if (!Number.isFinite(resolvedUserId) || !Number.isFinite(resolvedFlightId)) {
+    return res.status(400).json({ error: 'user_id and flight_id are required.' });
+  }
+
+  const normalizedTripType = (trip_type ?? tripType) === 'round-trip' ? 'round-trip' : 'one-way';
+
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const [userRows] = await conn.query('SELECT id FROM users WHERE id = ? LIMIT 1', [resolvedUserId]);
+    if (userRows.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    const [flightRows] = await conn.query(
+      'SELECT id, base_price, available_seats FROM flights WHERE id = ? LIMIT 1 FOR UPDATE',
+      [resolvedFlightId]
+    );
+    if (flightRows.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ error: 'Flight not found.' });
+    }
+    const flight = flightRows[0];
+    const availableSeats = Number.parseInt(String(flight.available_seats ?? 0), 10) || 0;
+    if (availableSeats < resolvedTotalPassengers) {
+      await conn.rollback();
+      return res.status(409).json({ error: 'Not enough seats available.' });
+    }
+
+    const resolvedFlightClassId = await resolveFlightClassId(
+      conn,
+      flight_class_id ?? flightClassId,
+      flight_class_code ?? flightClassCode
+    );
+    if (!resolvedFlightClassId) {
+      await conn.rollback();
+      return res.status(500).json({ error: 'Flight class not configured.' });
+    }
+
+    const [classRows] = await conn.query('SELECT multiplier FROM flight_classes WHERE id = ? LIMIT 1', [resolvedFlightClassId]);
+    const multiplier = Number(classRows?.[0]?.multiplier ?? 1) || 1;
+    const basePrice = Number(flight.base_price ?? 0) || 0;
+    const totalPrice = Math.round(basePrice * multiplier * resolvedTotalPassengers);
+
+    const bookingCode = generateCode(10);
+    const transactionCode = generateCode(20);
+
+    const [bookingResult] = await conn.query(
+      `INSERT INTO bookings
+        (booking_code, user_id, flight_id, flight_class_id, trip_type, total_passengers, total_price, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [bookingCode, resolvedUserId, resolvedFlightId, resolvedFlightClassId, normalizedTripType, resolvedTotalPassengers, totalPrice, 'confirmed']
+    );
+
+    await conn.query(
+      `INSERT INTO transactions
+        (transaction_code, user_id, booking_id, amount, payment_method, payment_status, payment_date, payment_details)
+       VALUES (?, ?, ?, ?, ?, ?, NOW(), NULL)`,
+      [transactionCode, resolvedUserId, bookingResult.insertId, totalPrice, 'credit_card', 'success']
+    );
+
+    await conn.query(
+      'UPDATE flights SET available_seats = available_seats - ? WHERE id = ?',
+      [resolvedTotalPassengers, resolvedFlightId]
+    );
+
+    await conn.commit();
+    return res.json({
+      success: true,
+      booking: {
+        id: bookingResult.insertId,
+        booking_code: bookingCode,
+        total_price: totalPrice,
+        total_passengers: resolvedTotalPassengers,
+        status: 'confirmed',
+      },
+      transaction: {
+        transaction_code: transactionCode,
+        payment_status: 'success',
+      },
+    });
+  } catch (error) {
+    try {
+      await conn.rollback();
+    } catch {
+      // ignore rollback errors
+    }
+    console.error(error);
+    if (error?.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: 'Duplicate booking/transaction code. Please retry.' });
+    }
+    return res.status(500).json({ error: 'Server error', details: error.message });
+  } finally {
+    conn.release();
+  }
+});
+
+// List purchases for a user
+app.get('/api/user/purchases', async (req, res) => {
+  const { id } = req.query;
+  const userId = Number.parseInt(String(id), 10);
+  if (!Number.isFinite(userId)) {
+    return res.status(400).json({ error: 'User id is required.' });
+  }
+  try {
+    const [rows] = await db.query(
+      `SELECT
+        b.id AS booking_id,
+        b.booking_code,
+        b.status AS booking_status,
+        b.total_price,
+        b.total_passengers,
+        b.booking_date,
+        f.departure_time,
+        f.arrival_time,
+        a.name AS airline_name,
+        a.code AS airline_code,
+        a.logo_url AS airline_logo,
+        orig.city AS origin_city,
+        orig.code AS origin_code,
+        dest.city AS destination_city,
+        dest.code AS destination_code,
+        t.payment_status
+      FROM bookings b
+      JOIN flights f ON f.id = b.flight_id
+      JOIN airlines a ON a.id = f.airline_id
+      JOIN airports orig ON orig.id = f.origin_airport_id
+      JOIN airports dest ON dest.id = f.destination_airport_id
+      LEFT JOIN transactions t ON t.booking_id = b.id
+      WHERE b.user_id = ?
+      ORDER BY b.booking_date DESC`,
+      [userId]
+    );
+
+    const purchases = rows.map((r) => ({
+      id: r.booking_id,
+      booking_code: r.booking_code,
+      status: r.payment_status || (r.booking_status === 'confirmed' ? 'success' : 'pending'),
+      amount: Number(r.total_price || 0),
+      date: r.booking_date,
+      title: `${r.origin_city} → ${r.destination_city}`,
+      meta: {
+        airline: {
+          name: r.airline_name,
+          code: r.airline_code,
+          logo: r.airline_logo ? buildAssetUrl(req, `assets/airline-logo/${r.airline_logo}`) : null,
+        },
+        origin: { city: r.origin_city, code: r.origin_code },
+        destination: { city: r.destination_city, code: r.destination_code },
+        departure_time: r.departure_time,
+        arrival_time: r.arrival_time,
+        total_passengers: r.total_passengers,
+      },
+    }));
+
+    return res.json({ success: true, purchases });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error', details: error.message });
+  }
 });

@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/auth-context";
+import { useNavigate } from "react-router-dom";
+import { useFlightSelection } from "../context/FlightSelectionContext";
 import FlightSummary from "../components/ui/FlightSummary";
 
 export default function CheckoutPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { selectedFlight } = useFlightSelection();
+  const [finalizing, setFinalizing] = useState(false);
+  const [finalizeError, setFinalizeError] = useState("");
 
   const initialContact = useMemo(() => {
     const fullName = user?.full_name || user?.name || "";
@@ -38,6 +44,54 @@ export default function CheckoutPage() {
   useEffect(() => {
     setContact(initialContact);
   }, [initialContact]);
+
+  const handleFinalizePurchase = async () => {
+    const numericUserId = Number.parseInt(String(user?.id), 10);
+    const numericFlightId = Number.parseInt(String(selectedFlight?.id), 10);
+
+    if (!user?.id) {
+      setFinalizeError("Silakan login terlebih dahulu.");
+      return;
+    }
+    if (!selectedFlight?.id) {
+      setFinalizeError("Tidak ada flight yang dipilih.");
+      return;
+    }
+    if (!Number.isFinite(numericUserId)) {
+      setFinalizeError("Sesi login kamu tidak valid. Silakan logout lalu login kembali.");
+      return;
+    }
+    if (!Number.isFinite(numericFlightId)) {
+      setFinalizeError("Data flight tidak valid. Silakan pilih flight lagi.");
+      return;
+    }
+
+    setFinalizing(true);
+    setFinalizeError("");
+    try {
+      const res = await fetch("http://localhost:3001/api/purchases/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: numericUserId,
+          flight_id: numericFlightId,
+          flight_class_code: selectedFlight.flightClassCode,
+          total_passengers: selectedFlight.totalPassengers || 1,
+          trip_type: "one-way",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setFinalizeError(data.error || "Gagal memfinalisasi pembelian.");
+        return;
+      }
+      navigate("/account/purchases");
+    } catch {
+      setFinalizeError("Gagal memfinalisasi pembelian.");
+    } finally {
+      setFinalizing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -116,6 +170,26 @@ export default function CheckoutPage() {
                 <input className="mt-1 w-full border border-border rounded-lg px-3 py-2 bg-background" />
               </div>
             </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-5">
+            <h3 className="font-semibold text-foreground">Finalize</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Pembayaran dilewati untuk sementara. Klik tombol di bawah untuk menyimpan pembelian tiket ke akun Anda.
+            </p>
+            {finalizeError && (
+              <div className="mt-3 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl text-red-700 dark:text-red-400 text-sm">
+                {finalizeError}
+              </div>
+            )}
+            <button
+              type="button"
+              className="mt-4 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+              onClick={handleFinalizePurchase}
+              disabled={finalizing}
+            >
+              {finalizing ? "Memproses..." : "Finalize Purchase"}
+            </button>
           </div>
         </div>
 

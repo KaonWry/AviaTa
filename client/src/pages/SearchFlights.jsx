@@ -611,14 +611,19 @@ export function SearchFlights() {
   const { setSelectedFlight } = useFlightSelection();
 
   const handleSelectFlight = (flight) => {
+    const normalizedFlightId = typeof flight?.id === 'string' ? Number(flight.id) : flight?.id;
+
     // Save selected flight to context and redirect to Passengers page
     setSelectedFlight({
       ...flight,
+      id: normalizedFlightId,
       originCity: flight.origin?.city,
       originCode: flight.origin?.code,
       destinationCity: flight.destination?.city,
       destinationCode: flight.destination?.code,
       className: flight.className || 'Economy',
+      totalPassengers: parseInt(adults) + parseInt(children) + parseInt(infants),
+      flightClassCode: flightClass,
     });
     navigate('/account/passengers');
   };
