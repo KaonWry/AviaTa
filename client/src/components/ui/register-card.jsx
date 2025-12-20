@@ -47,19 +47,12 @@ const RegisterCard = () => {
     }
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, passwordConfirm })
-      });
-      const data = await res.json();
-      if (data.success) {
-        // Use auth context to register
-        await register(name, email, password);
+      const result = await register(name, email, password, passwordConfirm);
+      if (result?.success) {
         navigate('/');
-      } else {
-        setError(data.error || 'Registrasi gagal.');
+        return;
       }
+      setError(result?.error || 'Registrasi gagal.');
     } catch {
       setError('Server error.');
     } finally {
